@@ -1,0 +1,1101 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Ledger Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: one column, max 860px. A ledger-ruled band on top, then one screen at a time: menu, definitions, recall map, quiz, results. */
+:root{
+  --bg:#edf3ee; --surface:#fbfdfb; --ink:#14231b; --muted:#56685d; --line:#cddbd1;
+  --green:#1d6b47; --green-soft:#dcebe0; --red:#b3392d; --red-soft:#f6e1dd;
+  --good:#1f8a4c; --good-soft:#d9f0e1; --hl:#f3d36b; --hl-ink:#2a2100;
+  --f-display:"Bitter",Georgia,serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1813; --surface:#16221b; --ink:#e3ece5; --muted:#93a69a; --line:#273a2e;
+  --green:#71c79c; --green-soft:#1c3326; --red:#ff8072; --red-soft:#3d1d19;
+  --good:#6fd394; --good-soft:#153522; --hl:#e9c45a; --hl-ink:#231a00; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1813; --surface:#16221b; --ink:#e3ece5; --muted:#93a69a; --line:#273a2e;
+  --green:#71c79c; --green-soft:#1c3326; --red:#ff8072; --red-soft:#3d1d19;
+  --good:#6fd394; --good-soft:#153522; --hl:#e9c45a; --hl-ink:#231a00; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16.5px;line-height:1.5;margin:0}
+.rule{height:26px;border-bottom:3px double var(--red);
+  background:repeating-linear-gradient(90deg,transparent 0 46px,var(--green) 46px 47px),var(--green-soft);opacity:.9}
+.wrap{max-width:860px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:22px 48px;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--f-display);font-weight:800;line-height:1.1;margin:0;text-wrap:balance}
+h1{font-size:clamp(2.1rem,6vw,3rem);letter-spacing:-.01em}
+h1 span{color:var(--green)}
+h1 small{font-family:var(--f-mono);font-size:.8rem;font-weight:500;color:var(--red);letter-spacing:.1em;margin-left:10px;vertical-align:middle}
+h2{font-size:1.5rem}
+h3{font-size:1.1rem}
+p{margin:0}
+code{font-family:var(--f-mono);font-size:.92em}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+.lead{color:var(--muted);max-width:62ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.small{font-size:.88rem;color:var(--muted)}
+
+.btn{background:var(--green);color:var(--surface);border:0;border-radius:8px;padding:12px 22px;font-weight:700;font-size:1rem;box-shadow:0 3px 0 color-mix(in srgb,var(--green) 55%,#000)}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 color-mix(in srgb,var(--green) 55%,#000)}
+.ghost{background:transparent;border:2px solid var(--line);border-radius:8px;padding:9px 16px;font-weight:600}
+.ghost:hover{border-color:var(--green)}
+.back{align-self:flex-start;background:none;border:0;color:var(--green);font-weight:700;padding:4px 0}
+
+.menu{display:grid;gap:12px}
+.card{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center;text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:18px 20px;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--green);transform:translateY(-2px)}
+.card .n{grid-row:span 2;font-family:var(--f-mono);font-weight:600;font-size:1.05rem;color:var(--red);border:2px solid var(--red);border-radius:6px;padding:6px 8px}
+.card b{font-family:var(--f-display);font-size:1.3rem}
+.card small{color:var(--muted);font-size:.95rem}
+
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.chip{text-align:left;background:transparent;border:2px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.chip b{font-size:1.02rem}
+.chip small{color:var(--muted);font-size:.88rem}
+.chip[aria-pressed="true"]{border-color:var(--green);background:var(--green-soft)}
+.note{border:2px dashed var(--green);background:color-mix(in srgb,var(--green) 8%,var(--surface));border-radius:8px;padding:12px 14px;font-size:.95rem}
+.note b{display:block}
+
+.defs{display:grid;gap:10px}
+.def{border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.def .nm{font-family:var(--f-display);font-weight:700;font-size:1.15rem;color:var(--green)}
+.def .why{font-size:.95rem}
+.def .ex{font-size:.92rem;color:var(--muted)}
+.hide-names .def .nm{filter:blur(7px);cursor:pointer;user-select:none}
+.hide-names .def .nm.show{filter:none}
+.grouptitle{font-family:var(--f-display);font-weight:800;font-size:1.2rem;padding-top:8px;border-bottom:2px solid var(--line);padding-bottom:4px}
+
+.hud{display:flex;flex-wrap:wrap;gap:6px 22px;align-items:baseline;justify-content:space-between}
+.hud div{display:flex;gap:6px;align-items:baseline}
+.hud .lab{color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}
+.hud b{font-family:var(--f-mono);font-weight:600;font-size:1.35rem;font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--green);transition:width .3s}
+.tag{font-size:.8rem;text-transform:uppercase;letter-spacing:.09em;color:var(--red);font-weight:700}
+.qtext{font-family:var(--f-display);font-weight:500;font-size:clamp(1.12rem,3vw,1.32rem);line-height:1.5;border-left:4px solid var(--green-soft);padding:2px 0 2px 16px}
+.defbox{background:var(--green-soft);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.nomebig{font-family:var(--f-display);font-weight:800;font-size:1.55rem;color:var(--green)}
+.missing{display:flex;flex-wrap:wrap;gap:8px}
+.missing span{border:2px solid var(--line);border-radius:6px;padding:6px 12px;font-weight:600}
+.missing span.q{border-style:dashed;border-color:var(--red);color:var(--red)}
+
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:560px){.opts{grid-template-columns:1fr}}
+.opt{display:flex;gap:12px;align-items:center;text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:8px;padding:12px 14px;min-height:60px;transition:border-color .12s,background .12s}
+.opt:hover:not(:disabled){border-color:var(--green)}
+.opt .k{flex:none;width:26px;height:26px;border-radius:6px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;font-family:var(--f-mono);font-weight:600;font-size:.85rem}
+.opt .t{display:flex;flex-direction:column;min-width:0;overflow-wrap:anywhere}
+.opt .t small{color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em}
+.opt .t span{font-weight:600}
+.opt.long .t span{font-weight:400;font-size:.94rem}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--red);background:var(--red-soft)}
+.opt.dim{opacity:.5}
+
+.write{display:flex;gap:10px;flex-wrap:wrap}
+.write input{flex:1 1 240px;min-width:0;font:inherit;font-size:1.08rem;padding:12px 14px;border:2px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.write input:focus{border-color:var(--green);outline:none}
+.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.fb{border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;border-left:6px solid var(--good);background:var(--good-soft)}
+.fb.bad{border-left-color:var(--red);background:var(--red-soft)}
+.fb strong{font-family:var(--f-display);font-weight:800;font-size:1.25rem}
+.fb.good strong{color:var(--good)}.fb.bad strong{color:var(--red)}
+.fb .nt{font-weight:600}
+
+.mapgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.grp{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.grp h3{font-size:.98rem;color:var(--green)}
+.slot{border:2px dashed var(--line);border-radius:6px;padding:6px 10px;font-weight:600;color:var(--muted);min-height:36px;display:flex;align-items:center;font-size:.95rem}
+.slot.ok{border-style:solid;border-color:var(--good);background:var(--good-soft);color:var(--ink);animation:pop .35s}
+.slot.lost{border-style:solid;border-color:var(--red);background:var(--red-soft);color:var(--ink)}
+@keyframes pop{50%{transform:scale(1.04)}}
+
+.big{font-family:var(--f-mono);font-weight:600;font-size:clamp(3rem,12vw,4.6rem);line-height:1;color:var(--green);font-variant-numeric:tabular-nums}
+.stats{display:flex;gap:8px 26px;flex-wrap:wrap;color:var(--muted)}
+.stats b{color:var(--ink)}
+.review{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.review li{border-left:4px solid var(--red);padding:2px 0 2px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.review .qtext{font-size:1rem;border:0;padding:0}
+.review .ra{color:var(--good);font-weight:700}
+.foot{font-size:.84rem;color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+</head><body>
+<div class="rule" aria-hidden="true"></div>
+<div class="wrap">
+
+<header><h1>Ledger <span>Lab</span><small>DR | CR</small></h1></header>
+
+<!-- HOME -->
+<section id="home" style="display:flex;flex-direction:column;gap:16px">
+  <p class="lead">Financial Accounting midterm practice, built from your weeks 1–6 summary. Three games, rounds of 10, and at the end you see every miss with the reason.</p>
+  <div class="menu">
+    <button class="card" data-go="defs"><span class="n">01</span><b>Definitions</b><small>What each concept is and why it matters. Read the cards, then take the quiz.</small></button>
+    <button class="card" data-go="memo"><span class="n">02</span><b>Memorise the lists</b><small>Fill in all 50 names from memory (elements, assumptions, principles, forces…), or spot the missing one.</small></button>
+    <button class="card" data-go="setup"><span class="n">03</span><b>Name that concept</b><small>Scenarios, T-account logic, red flags and cases. Easy, medium or hard, multiple choice or typed answer.</small></button>
+  </div>
+</section>
+
+<!-- DEFINITIONS -->
+<section id="defs" class="panel" hidden>
+  <button class="back" data-go="home">← Menu</button>
+  <h2>Definitions and why they matter</h2>
+  <p class="lead">Each card has the definition, why it matters, and an example from the course.</p>
+  <div class="row">
+    <button class="btn" id="defsQuiz">Take the definitions quiz</button>
+    <button class="ghost" id="hideNames" aria-pressed="false">Hide the names</button>
+  </div>
+  <div id="defList" class="defs"></div>
+</section>
+
+<!-- MEMO -->
+<section id="memo" class="panel" hidden>
+  <button class="back" data-go="home">← Menu</button>
+  <h2>Memorise the lists</h2>
+  <div class="row">
+    <button class="chip" style="flex:1 1 220px" id="memoWrite" aria-pressed="true"><b>Write them all</b><small>Type the 50 names, in any order.</small></button>
+    <button class="chip" style="flex:1 1 220px" id="memoFalta" aria-pressed="false"><b>Which one is missing?</b><small>See a list with a gap and pick what fills it.</small></button>
+  </div>
+  <div id="recall" style="display:flex;flex-direction:column;gap:14px">
+    <div class="hud">
+      <div><span class="lab">Found</span><b id="rCount">0/50</b></div>
+      <div><span class="lab">Time</span><b id="rTime">0:00</b></div>
+      <div class="small" id="rBest"></div>
+    </div>
+    <form class="write" id="rForm" autocomplete="off">
+      <input id="rInput" type="text" placeholder="Type a name, e.g. going concern" autocapitalize="none" autocorrect="off" spellcheck="false" aria-label="A name from the lists">
+    </form>
+    <p class="small">Capitals, hyphens and plurals don't matter. A name drops into its box by itself; if it's the start of a longer name (like «cost» and «cost leadership»), press Enter.</p>
+    <div class="mapgrid" id="map"></div>
+    <div class="row">
+      <button class="ghost" id="rHint">Show first letters</button>
+      <button class="ghost" id="rGiveUp">Give up and show the rest</button>
+      <button class="ghost" id="rReset">Start again</button>
+    </div>
+  </div>
+  <div id="faltaBox" hidden style="display:flex;flex-direction:column;gap:12px">
+    <p class="lead">Round of 10. Each question shows one list from the course with one name covered.</p>
+    <button class="btn" style="align-self:flex-start" id="faltaGo">Start</button>
+  </div>
+</section>
+
+<!-- SETUP -->
+<section id="setup" class="panel" hidden>
+  <button class="back" data-go="home">← Menu</button>
+  <h2>Name that concept</h2>
+  <h3>Difficulty</h3>
+  <div class="chips" id="levels"></div>
+  <h3>Answer type</h3>
+  <div class="chips" id="modes"></div>
+  <div class="note" id="disc" hidden>
+    <b>Typed answers: write just the name of the concept.</b>
+    Capitals, hyphens, plurals and words like “the”, “principle” or “assumption” are ignored, so <code>Going-concern</code>, <code>going concern</code> and <code>the going concern assumption</code> all count. Spelling does count. For numbers, type the digits: <code>12500</code>, <code>12,500</code> and <code>€12,500</code> all work. Account names work too (<code>accounts receivable</code>, <code>receivables</code>). Questions whose answer is a sentence or an equation effect only appear in multiple choice, so this mode has fewer questions per level.
+  </div>
+  <button class="btn" style="align-self:flex-start" id="guessGo">Start</button>
+  <p class="small" id="guessBest"></p>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" class="panel" hidden>
+  <div class="hud">
+    <div><span class="lab">Question</span><b id="hQ">1/10</b></div>
+    <div><span class="lab">Points</span><b id="hS">0</b></div>
+    <div><span class="lab">Streak</span><b id="hK">0</b></div>
+  </div>
+  <div class="bar"><i id="hBar" style="width:0"></i></div>
+  <div class="tag" id="qTag"></div>
+  <div id="qPrompt" style="display:flex;flex-direction:column;gap:12px"></div>
+  <div class="opts" id="opts"></div>
+  <form class="write" id="wForm" autocomplete="off" hidden>
+    <input id="wInput" type="text" placeholder="Type the concept" autocapitalize="none" autocorrect="off" spellcheck="false" aria-label="Your answer">
+    <button class="btn" type="submit">Answer</button>
+  </form>
+  <div class="fb" id="fb" hidden>
+    <strong id="fbT"></strong>
+    <p class="nt" id="fbN" hidden></p>
+    <p id="fbA"></p>
+    <p id="fbE"></p>
+    <button class="btn" style="align-self:flex-start" id="nextBtn">Next</button>
+  </div>
+  <button class="back" id="quit">← Leave the round</button>
+</section>
+
+<!-- END -->
+<section id="end" class="panel" hidden>
+  <h2 id="endTitle">Round complete</h2>
+  <div class="big" id="endScore">0</div>
+  <div class="stats" id="endStats"></div>
+  <div id="reviewBox" style="display:flex;flex-direction:column;gap:12px"></div>
+  <div class="row">
+    <button class="btn" id="again">Play again</button>
+    <button class="ghost" data-go="home">Menu</button>
+  </div>
+</section>
+
+<p class="foot">Questions follow the course summary (Nova SBE, weeks 1–6 and the midterm revision slides, including the Intermarché case). Where the course gives a specific example or verdict, the game uses the same one.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+
+/* ---------- answer keys: label, aliases, family (t:false = not typable) ---------- */
+var K={};
+function k(id,l,f,a,t){K[id]={l:l,f:f,a:(a||[]).concat([l]),t:t!==false}}
+k("asset","Asset","element",["assets"]);k("liability","Liability","element",["liabilities"]);k("equity","Equity","element",["owners equity","owner equity","shareholders equity"]);
+k("revenue","Revenue (income)","element",["revenue","revenues","income"]);k("expense","Expense","element",["expenses"]);
+k("entity","Economic entity","assumption",["entity","business entity","separate entity"]);k("going","Going concern","assumption",[]);
+k("monetary","Monetary measurement","assumption",["monetary","monetary unit","money measurement"]);k("period","Accounting period","assumption",["period","time period","periodicity"]);
+k("cost","Cost principle","principle",["cost","historical cost","historic cost"]);k("revrec","Revenue recognition","principle",[]);
+k("matching","Matching","principle",[]);k("materiality","Materiality","principle",[]);k("consistency","Consistency","principle",[]);
+k("relevance","Relevance","qc",["relevant"]);k("faithful","Faithful representation","qc",["reliability","faithfully represented"]);
+k("comparability","Comparability","qc",[]);k("verifiability","Verifiability","qc",["verifiable"]);k("timeliness","Timeliness","qc",["timely"]);
+k("understandability","Understandability","qc",["understandable"]);k("costbenefit","Cost–benefit constraint","qc",["cost benefit","cost-benefit"]);
+k("prudence","Prudence","qc",["conservatism"]);k("neutrality","Neutrality","qc",["neutral"]);
+k("accrual","Accrual (timing alignment)","adjust",["accrual","accruals","timing alignment"]);k("deferral","Deferral","adjust",["deferrals"]);
+k("allocation","Allocation","adjust",[]);k("estimation","Estimation & valuation","adjust",["estimation","estimate","estimates","valuation","estimation and valuation"]);
+k("debit","Debit","dc",["dr"]);k("credit","Credit","dc",["cr"]);
+k("aa","Asset ↑ · another asset ↓","eq",[],false);k("alu","Asset ↑ · liability ↑","eq",[],false);k("ald","Asset ↓ · liability ↓","eq",[],false);
+k("aeu","Asset ↑ · equity ↑","eq",[],false);k("aed","Asset ↓ · equity ↓","eq",[],false);k("led","Liability ↑ · equity ↓","eq",[],false);k("leu","Liability ↓ · equity ↑","eq",[],false);
+k("bs","Balance sheet (SFP)","stmt",["balance sheet","statement of financial position","sfp"]);k("is","Income statement","stmt",["profit and loss","p l","p&l","income statement"]);
+k("cfs","Cash flow statement","stmt",["statement of cash flows","cash flow statement","cfs","cash flows"]);
+k("operating","Operating","act",["operating activities","operations"]);k("investing","Investing","act",["investing activities"]);k("financing","Financing","act",["financing activities"]);
+k("journal","Journal","book",[]);k("ledger","Ledger","book",["general ledger"]);k("tb","Trial balance","book",["tb","unadjusted trial balance"]);
+k("rivals","Existing rivals","force",["rivals","rivalry","competitors","existing competitors"]);k("entrants","New entrants","force",["entrants","threat of new entrants"]);
+k("substitutes","Alternative solutions (substitutes)","force",["substitutes","substitute","alternative solutions","alternatives"]);
+k("suppliers","Supplier power","force",["suppliers","bargaining power of suppliers"]);k("customers","Customer power","force",["customers","buyer power","bargaining power of customers"]);
+k("costlead","Cost leadership","strat",[]);k("diff","Differentiation","strat",[]);
+k("service","A service","view",["service","accounting as a service"]);k("infosystem","An information system","view",["information system","accounting information system"]);
+k("language","A language","view",["language","language of business"]);k("dtool","A decision-support tool","view",["decision support tool","decision support","decision making tool","decision tool","decision making"]);
+k("impairment","Impairment","misc",["impairment loss","write down"]);k("contract","Contract liability (unearned revenue)","misc",["contract liability","unearned revenue","deferred revenue"]);
+k("provision","Provision","misc",["warranty provision","provisions"]);k("allowance","Allowance for doubtful accounts","misc",["allowance","bad debt allowance","doubtful debts","allowance for doubtful debts"]);
+k("depreciation","Depreciation","misc",[]);k("eqq","Earnings quality","misc",["quality of earnings"]);k("controls","Internal controls","misc",["internal control"]);
+k("assurance","Assurance (external audit)","misc",["assurance","audit","external audit"]);k("asym","Information asymmetry","misc",["asymmetric information"]);
+k("duality","Duality (double entry)","misc",["duality","double entry","double entry bookkeeping"]);k("recognition","Recognition","misc",[]);k("measurement","Measurement","misc",[]);
+k("disclosure","Presentation & disclosure","misc",["disclosure","disclosures","presentation","presentation and disclosure"]);
+k("stewardship","Stewardship (accountability)","misc",["stewardship","accountability"]);k("usefulness","Decision usefulness","misc",[]);
+k("fcf","Free cash flow","misc",["fcf"]);k("nongaap","Non-GAAP (adjusted) earnings","misc",["non gaap","adjusted earnings","non gaap earnings"]);
+k("rfcash","Profits not backed by operating cash flow","rf",[],false);k("rfwc","Receivables or inventory growing faster than revenue","rf",[],false);
+k("rfstd","Heavy reliance on short-term debt","rf",[],false);k("rfone","Recurring “one-off” gains","rf",[],false);k("rfcut","Aggressive revenue cut-off","rf",[],false);
+k("informative","Informative (neutral)","stance",["informative"]);k("aggressive","Aggressive (income-increasing)","stance",["aggressive"]);
+k("bigbath","Excessively conservative (big bath)","stance",["big bath","conservative","excessively conservative"]);
+k("enron","Enron","case");k("worldcom","WorldCom","case");k("toshiba","Toshiba","case");k("wirecard","Wirecard","case");k("carillion","Carillion","case");
+k("waste","Waste Management","case");k("wework","WeWork","case");k("meta","Meta","case");k("volkswagen","Volkswagen","case");k("amazon","Amazon","case");
+
+var FAM={element:"Element",assumption:"Assumption",principle:"Principle",qc:"Framework",adjust:"Adjusting entry",dc:"",eq:"Equation",stmt:"Statement",act:"Activity",book:"Book",force:"Competitive force",strat:"Strategy",view:"View",misc:"Concept",rf:"Red flag",stance:"Reporting stance",case:"Case"};
+var NOFILL={dc:1,stmt:1,act:1,book:1,strat:1,stance:1};
+var POOL=Object.keys(K).filter(function(x){return ["assumption","principle","qc","misc","adjust"].indexOf(K[x].f)>=0});
+function famOf(f){return Object.keys(K).filter(function(x){return K[x].f===f})}
+function distractors(a,fixed){
+  var f=K[a].f,out=[];
+  (fixed||[]).forEach(function(x){if(out.length<3&&x!==a&&out.indexOf(x)<0&&K[x])out.push(x)});
+  shuffle(famOf(f)).forEach(function(x){if(out.length<3&&x!==a&&out.indexOf(x)<0)out.push(x)});
+  if(!NOFILL[f])shuffle(POOL).forEach(function(x){if(out.length<3&&x!==a&&out.indexOf(x)<0)out.push(x)});
+  return out;
+}
+function keyOpt(x){return {id:x,main:K[x].l,sub:FAM[K[x].f]}}
+
+/* ---------- normalising typed answers ---------- */
+var FILL=["the","a","an","of","and","principle","assumption","concept","constraint","characteristic"];
+function norm(s){
+  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/&/g," and ").replace(/[^a-z0-9]+/g," ").trim()
+    .split(" ").filter(function(w){return w&&FILL.indexOf(w)<0})
+    .map(function(w){return w.length>3&&/s$/.test(w)&&!/ss$/.test(w)?w.slice(0,-1):w}).join(" ");
+}
+function accepts(x){return K[x].a.map(norm)}
+
+/* ---------- 1. definitions ---------- */
+var D=[
+ ["Elements","asset","A resource the business controls and has the right to use, expected to bring future economic benefit.","Shows what the firm can use to generate future cash. Buying an asset swaps one asset for another; it is not an expense.","Cash in bank, inventory, equipment."],
+ ["Elements","liability","A present obligation to transfer economic resources to others in the future, because of past events.","Shows the claims of lenders and suppliers, which drives liquidity and solvency.","Bank loans, money owed to suppliers, unearned revenue."],
+ ["Elements","equity","The owners’ residual claim on the assets after all liabilities are settled.","Rises with owner investment and profit, falls with losses and dividends.","Owner invests €3,000 → equity ↑."],
+ ["Elements","revenue","An increase in equity from normal operations, through an asset ↑ or a liability ↓. Owner investment is not revenue.","Measures the value customers were willing to pay for.","Cash sale; service performed on credit (receivable ↑)."],
+ ["Elements","expense","A decrease in equity when resources are used to earn revenue, through an asset ↓ or a liability ↑.","Measures the sacrifice made to earn revenue. Asset purchases, loan repayments and dividends are not expenses.","Electricity used; supplies used on account."],
+ ["Assumptions","entity","The business is treated as separate from its owners; only the activities inside its boundary are reported.","The boundary is a judgment. Activities left outside it (SPEs, unconsolidated JVs) make statements look healthier than reality.","Owner’s personal laptop → not recorded. Enron’s SPEs."],
+ ["Assumptions","going","The firm is expected to keep operating for the foreseeable future, not be liquidated.","Justifies depreciation, current vs non-current classification and valuing assets by use, not forced sale.","Carillion: profits and asset values assumed survival that did not happen."],
+ ["Assumptions","monetary","Only what can be reliably measured in money is recognised.","Money allows aggregation and comparison, but internally generated intangibles (brand, data, talent) stay invisible.","Employee motivation is not recorded. Meta’s network and data."],
+ ["Assumptions","period","The continuous life of the business is cut into artificial periods (months, quarters, years).","Makes periodic reporting possible, but creates timing judgments (cut-off, accruals) and incentives near period-end.","Waste Management shifted expenses into future periods."],
+ ["Principles","cost","Assets are initially recorded at their transaction cost, not at management’s estimate of value.","Anchors numbers in verifiable events: reliability over immediacy. Impairment corrects it when value falls.","€30,000 van stays at €30,000; land written up to €5m on a belief is a violation."],
+ ["Principles","revrec","Revenue is recognised when performance obligations are satisfied (control passes to the customer), not when cash is received.","Timing of revenue is a main channel of earnings management.","€120 one-year subscription → €10 per month."],
+ ["Principles","matching","Expenses are recognised in the same period as the revenues they help generate.","Links effort and outcome. Applied aggressively, it shifts costs to later periods.","Goods sold in March → cost of goods sold in March."],
+ ["Principles","materiality","Report with detail proportional to significance: items that could influence users’ decisions are shown or disclosed.","A judgment in context (size, nature, implications), not a fixed threshold.","€3 of lost supplies is immaterial; €3,000 of lost inventory is material."],
+ ["Principles","consistency","The same methods and classifications are used from one period to the next, unless there is a good, explained reason to change.","Lets users see trends. Frequent method changes can smooth earnings with no real improvement.","Straight-line depreciation this year → straight-line next year."],
+ ["Principles","impairment","A write-down when an asset’s carrying amount exceeds what it can recover through use or sale.","The corrective mechanism of the cost principle; delaying it inflates profit now, and the losses come later.","Machine at €40,000 with future cash flows of €15,000 → written down to €15,000."],
+ ["Framework","relevance","Information can make a difference to decisions, through predictive or confirmatory value.","Fundamental characteristic. Without it, information is useless however precise.","Revenue trends help predict future cash flows."],
+ ["Framework","faithful","Information reflects the economic substance: complete, neutral and free from material error.","Fundamental characteristic. Relevant information that cannot be trusted misleads.","A CEO’s forecast is relevant but weak on faithful representation."],
+ ["Framework","comparability","Users can compare across firms and over time.","Enhancing characteristic. Does not require identical treatment of different business models.","Netflix capitalising content makes it less comparable with traditional media."],
+ ["Framework","verifiability","Knowledgeable, independent observers could broadly agree on how a number was derived.","Enhancing characteristic; the reason invoices and receipts matter.","A supplier invoice, not a manager’s guess."],
+ ["Framework","timeliness","Information is available in time to influence decisions.","Enhancing characteristic: late information loses decision value.","Waiting until liquidation for certainty would be useless."],
+ ["Framework","understandability","Clear classification and disclosure for informed users.","Enhancing characteristic, but it is not oversimplification.","Notes explaining why profit differs from cash."],
+ ["Framework","costbenefit","Information is provided only when the benefits to users exceed the costs of producing and interpreting it.","Even relevant, faithful information need not be reported if it costs too much.","Staff time, users’ analysis time, revealing secrets to competitors."],
+ ["Framework","prudence","Caution under uncertainty, so assets and income are not overstated, without becoming pessimistic.","Excessive conservatism (big bath) is as misleading as optimism.","Recognising a probable loss, but not inventing one."],
+ ["Framework","neutrality","Information is not tailored to reach a particular outcome, such as smooth earnings.","Part of faithful representation; Cases A and C of Intermarché violate it.","Insurance recovery estimated from the insurer’s evidence."],
+ ["Recording process","duality","Every transaction affects the business in two ways, so the records always balance.","Basis of double entry: forces you to look for the second side of every event.","Borrow €5,000: cash ↑ and loan payable ↑."],
+ ["Recording process","journal","Records transactions in chronological order: date, accounts, debit/credit amounts, short explanation.","Management’s first formal claim about what happened; it fixes timing and classification downstream.","Laptops delivered on 30-day credit, recorded on the day."],
+ ["Recording process","ledger","Transactions posted from the journal and organised by account, with each account’s running balance.","Unusual growth or swings in a ledger account are the first signals of aggressive timing or misclassification.","Receivables balance rising for three quarters."],
+ ["Recording process","tb","A list of all ledger balances that checks total debits = total credits.","Checks structure only, not economic accuracy: omissions, wrong periods and wrong accounts still balance.","A balanced TB with a missing contract liability."],
+ ["Adjusting entries","accrual","Activity happened this period but cash has not moved or nothing was recorded yet.","Recognises revenues earned and expenses incurred in the right period.","Wages earned in December, paid in January; interest accrued."],
+ ["Adjusting entries","deferral","Cash moved earlier, but the activity spans several periods.","Spreads amounts already recorded over the periods they belong to.","Prepaid insurance; unearned (deferred) revenue."],
+ ["Adjusting entries","allocation","Spreading the cost of long-lived assets over the periods that benefit.","Expenses follow consumption, not payment; relies on useful lives and residual values.","Depreciation and amortisation."],
+ ["Adjusting entries","estimation","Recognising probable losses and obligations before they are settled in cash.","The most judgment-heavy area, where managerial discretion is greatest.","Bad-debt allowances, warranty provisions, impairments."],
+ ["Statements","bs","Assets, liabilities and equity at a point in time (a stock, a snapshot).","Answers: what does the firm own and owe, and can it meet its obligations?","NVIDIA: assets $111.6bn = liabilities $32.3bn + equity $79.3bn."],
+ ["Statements","is","Revenues and expenses on an accrual basis over a period, giving profit or loss (a flow).","Answers: is the strategy generating wealth sustainably?","Revenue, margins, cost discipline."],
+ ["Statements","cfs","Cash inflows and outflows over a period, split into operating, investing and financing.","Cash is hard to fake. It introduces no new judgments and reconciles accrual profit with cash.","Credit sale: revenue in the IS, nothing in the CFS yet."],
+ ["Standards, credibility and quality","recognition","Should this event appear in the statements? It must meet an element definition, give relevant information and be faithfully representable.","The gatekeeper: decides what is visible and what stays off the balance sheet.","A pending lawsuit may only be disclosed in the notes."],
+ ["Standards, credibility and quality","measurement","At what amount should a recognised item be reported (historical cost or current value)?","A trade-off between verifiability and relevance, not a search for one true value.","Amazon Prime price allocated across the service months."],
+ ["Standards, credibility and quality","disclosure","Where items appear in the statements and what the notes must explain.","Where measurement is uncertain, disclosure tells users the assumptions and risks.","Deferred subscription shown as a liability, with the policy explained."],
+ ["Standards, credibility and quality","controls","Systems designed by management to ensure accurate reporting, safeguard assets and prevent fraud.","Management’s responsibility, built into daily operations; makes what auditors test reliable.","Segregation of duties, authorisations, reconciliations."],
+ ["Standards, credibility and quality","assurance","An independent auditor’s reasonable (not absolute) assurance that statements are free from material misstatement.","Increases confidence and lowers cost of capital, but never eliminates risk.","Wirecard: auditors could not verify the cash."],
+ ["Standards, credibility and quality","contract","Cash received before the service is delivered: an obligation to perform.","The missing second side when revenue is booked up-front.","€120,000 subscription on 1 March → €110,000 liability at the end of March."],
+ ["Standards, credibility and quality","provision","An estimated future obligation recognised before it is paid.","Under-estimating it overstates profit now; cash is paid later.","Tesla and Apple warranty provisions."],
+ ["Standards, credibility and quality","allowance","The estimated part of receivables that customers will not pay.","Lowering it raises profit today but hides cash risk.","NVIDIA’s allowance for doubtful accounts."],
+ ["Standards, credibility and quality","depreciation","(Cost − residual value) ÷ useful life: allocation of an asset’s cost over its use.","Not a cash outflow and not a valuation; longer lives mean lower depreciation and higher profit.","Apple’s useful-life assumptions."],
+ ["Standards, credibility and quality","eqq","How far reported earnings reflect real economic performance and help predict future cash flows.","High-quality earnings persist, are backed by cash and are transparent about assumptions.","WeWork: adjusted earnings improved while cash burn grew."],
+ ["Standards, credibility and quality","asym","Outsiders cannot observe what happens inside the business.","The reason accounting exists: investors and lenders need information to decide.","A lender cannot watch the firm’s daily operations."],
+ ["Standards, credibility and quality","stewardship","Holding managers accountable for how they used the resources entrusted to them.","One of the two purposes of reporting, beside decision usefulness.","Owners assessing management through net income and cash flow."],
+ ["Standards, credibility and quality","fcf","Cash the company generates and can freely use after all costs needed to keep running, including capex.","A key investor check on whether profit turns into usable cash.","Operating cash flow compared with capex."]
+];
+
+function renderDefs(){
+  var box=$("defList"),cur="";
+  D.forEach(function(d){
+    if(d[0]!==cur){cur=d[0];var h=document.createElement("div");h.className="grouptitle";h.textContent=cur;box.appendChild(h)}
+    var c=document.createElement("article");c.className="def";
+    c.innerHTML='<span class="nm" tabindex="0"></span><p></p><p class="why"><b>Why it matters:</b> </p><p class="ex"></p>';
+    c.querySelector(".nm").textContent=K[d[1]].l;c.children[1].textContent=d[2];
+    c.querySelector(".why").appendChild(document.createTextNode(d[3]));c.querySelector(".ex").textContent="Example: "+d[4];
+    var nm=c.querySelector(".nm");nm.addEventListener("click",function(){nm.classList.toggle("show")});
+    nm.addEventListener("keydown",function(e){if(e.key==="Enter")nm.classList.toggle("show")});
+    box.appendChild(c);
+  });
+}
+$("hideNames").onclick=function(){
+  var on=$("defs").classList.toggle("hide-names");
+  this.setAttribute("aria-pressed",on);this.textContent=on?"Show the names":"Hide the names";
+  document.querySelectorAll(".def .nm.show").forEach(function(n){n.classList.remove("show")});
+};
+$("defsQuiz").onclick=function(){startQuiz("defs","mc")};
+function defsItems(){
+  var items=[],byK={};D.forEach(function(d){byK[d[1]]=d});
+  D.forEach(function(d){
+    var sib=D.filter(function(o){return o[0]===d[0]&&o[1]!==d[1]}).map(function(o){return o[1]});
+    var ds=shuffle(sib).slice(0,3);
+    if(ds.length<3)shuffle(D.map(function(o){return o[1]})).forEach(function(x){if(ds.length<3&&x!==d[1]&&ds.indexOf(x)<0)ds.push(x)});
+    items.push({tag:"Name the concept",html:'<p><b>Which concept matches this definition?</b></p><div class="defbox"><p>'+esc(d[2])+'</p><p><b>Why it matters:</b> '+esc(d[3])+'</p></div>',
+      options:shuffle([d[1]].concat(ds)).map(function(x){return {id:x,main:K[x].l}}),answer:d[1],answerText:K[d[1]].l,expl:"Example: "+d[4]});
+    var ds2=shuffle(sib).slice(0,3);
+    if(ds2.length<3)shuffle(D.map(function(o){return o[1]})).forEach(function(x){if(ds2.length<3&&x!==d[1]&&ds2.indexOf(x)<0)ds2.push(x)});
+    items.push({tag:"Pick the definition",html:'<p><b>What is the definition of</b></p><p class="nomebig">'+esc(K[d[1]].l)+'</p>',
+      options:shuffle([d[1]].concat(ds2)).map(function(x){return {id:x,main:byK[x][2],long:true}}),answer:d[1],answerText:d[2],expl:"Why it matters: "+d[3]});
+  });
+  return items;
+}
+
+/* ---------- 2. memorise the lists ---------- */
+var GROUPS=[
+ ["The 5 elements",["asset","liability","equity","revenue","expense"]],
+ ["The 4 assumptions",["entity","going","monetary","period"]],
+ ["The 5 principles",["cost","revrec","matching","materiality","consistency"]],
+ ["The 3 financial statements",["bs","is","cfs"]],
+ ["The 3 cash-flow categories",["operating","investing","financing"]],
+ ["The 3 business decisions",["financing","investing","operating"]],
+ ["The 3 accounting books",["journal","ledger","tb"]],
+ ["The 4 groups of adjusting entries",["accrual","deferral","allocation","estimation"]],
+ ["2 fundamental qualitative characteristics",["relevance","faithful"]],
+ ["4 enhancing qualitative characteristics",["comparability","verifiability","timeliness","understandability"]],
+ ["3 things standards decide",["recognition","measurement","disclosure"]],
+ ["The 5 competitive forces",["rivals","entrants","substitutes","suppliers","customers"]],
+ ["2 business strategies",["costlead","diff"]],
+ ["4 ways to view accounting",["service","infosystem","language","dtool"]]
+];
+var SLOTS=[];GROUPS.forEach(function(g,gi){g[1].forEach(function(x){SLOTS.push({id:gi+"-"+x,k:x,acc:accepts(x)})})});
+var R={found:{},t0:0,timer:0,hint:false,done:false},memoMode="write";
+function renderMap(){
+  var box=$("map");box.innerHTML="";
+  GROUPS.forEach(function(g,gi){
+    var c=document.createElement("div");c.className="grp";var h=document.createElement("h3");h.textContent=g[0];c.appendChild(h);
+    g[1].forEach(function(x){
+      var id=gi+"-"+x,d=document.createElement("div");d.className="slot";
+      var st=R.found[id];
+      if(st){d.classList.add(st);d.textContent=K[x].l}
+      else d.textContent=R.hint?K[x].l.charAt(0)+" …":"?";
+      c.appendChild(d);
+    });
+    box.appendChild(c);
+  });
+  $("rCount").textContent=Object.keys(R.found).filter(function(x){return R.found[x]==="ok"}).length+"/"+SLOTS.length;
+}
+function clock(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
+function stopTimer(){if(R.timer){clearInterval(R.timer);R.timer=0}}
+function tickTimer(){$("rTime").textContent=clock(Math.floor((Date.now()-R.t0)/1000))}
+function showRecallBest(){var b=store("ledger-map");$("rBest").textContent=b?"Best time: "+clock(+b):""}
+function resetRecall(){stopTimer();R={found:{},t0:0,timer:0,hint:false,done:false};$("rTime").textContent="0:00";$("rInput").value="";$("rInput").disabled=false;$("rHint").textContent="Show first letters";renderMap();showRecallBest()}
+function tryFill(v,force){
+  var n=norm(v);if(!n)return false;
+  var open=SLOTS.filter(function(s){return !R.found[s.id]});
+  var hit=open.filter(function(s){return s.acc.indexOf(n)>=0})[0];
+  if(!hit)return false;
+  if(!force&&open.some(function(s){return s.acc.some(function(a){return a!==n&&a.indexOf(n+" ")===0})}))return false;
+  R.found[hit.id]="ok";renderMap();
+  if(Object.keys(R.found).length===SLOTS.length)finishRecall(true);
+  return true;
+}
+$("rInput").addEventListener("input",function(){
+  if(R.done)return;
+  if(!R.t0){R.t0=Date.now();R.timer=setInterval(tickTimer,500)}
+  if(tryFill(this.value,false))this.value="";
+});
+$("rForm").addEventListener("submit",function(e){
+  e.preventDefault();var i=$("rInput");if(R.done)return;
+  if(tryFill(i.value,true)){i.value="";return}
+  i.classList.remove("shake");void i.offsetWidth;if(i.value.trim())i.classList.add("shake");
+});
+$("rHint").onclick=function(){R.hint=!R.hint;this.textContent=R.hint?"Hide first letters":"Show first letters";renderMap()};
+$("rGiveUp").onclick=function(){if(R.done)return;SLOTS.forEach(function(s){if(!R.found[s.id])R.found[s.id]="lost"});finishRecall(false)};
+$("rReset").onclick=resetRecall;
+function finishRecall(won){
+  R.done=true;stopTimer();$("rInput").disabled=true;renderMap();
+  if(won){var s=Math.floor((Date.now()-R.t0)/1000);tickTimer();var b=store("ledger-map");
+    if(!R.hint&&(!b||s<+b)){store("ledger-map",String(s));$("rBest").textContent="New record: "+clock(s)}
+    else $("rBest").textContent="All 50 in "+clock(s)+(R.hint?" (with hints)":"");}
+  else{var miss=SLOTS.filter(function(s){return R.found[s.id]==="lost"}).length;$("rBest").textContent=miss+" missing (in red). Press Start again to retry."}
+}
+function memoView(m){
+  memoMode=m;$("memoWrite").setAttribute("aria-pressed",m==="write");$("memoFalta").setAttribute("aria-pressed",m==="falta");
+  $("recall").hidden=m!=="write";$("faltaBox").hidden=m!=="falta";
+  if(m==="write"){if(!R.t0&&!R.done)resetRecall();else renderMap();showRecallBest()}else stopTimer();
+}
+$("memoWrite").onclick=function(){memoView("write")};
+$("memoFalta").onclick=function(){memoView("falta")};
+$("faltaGo").onclick=function(){startQuiz("falta","mc")};
+function faltaItems(){
+  var items=[];
+  GROUPS.forEach(function(g){
+    g[1].forEach(function(miss){
+      var others=shuffle(Object.keys(K).filter(function(x){return K[x].t&&g[1].indexOf(x)<0&&["eq","rf","case","stance","dc"].indexOf(K[x].f)<0})).slice(0,3);
+      var chips=g[1].map(function(x){return x===miss?'<span class="q">?</span>':'<span>'+esc(K[x].l)+'</span>'}).join("");
+      items.push({tag:"Which one is missing?",html:'<p><b>'+esc(g[0])+'</b></p><div class="missing">'+chips+'</div>',
+        options:shuffle([miss].concat(others)).map(function(x){return {id:x,main:K[x].l}}),answer:miss,answerText:K[miss].l,
+        expl:g[0]+": "+g[1].map(function(x){return K[x].l}).join(", ")+"."});
+    });
+  });
+  return items;
+}
+
+/* ---------- 3. question bank: [question, answer key or literal text, explanation, distractor keys or literal wrong answers] ---------- */
+var BANK={
+easy:[
+ ["The business buys a laptop for the owner’s personal use at home. It is not recorded in the company’s books. Which assumption explains this?","entity","Only the business’s own activities are recorded; the owner’s personal affairs are outside its boundary."],
+ ["Assets are valued as if the business will keep using them for years, not as if it closes tomorrow. Which assumption?","going","Going concern: assets are measured by their use in an ongoing business, not by forced-sale value."],
+ ["Employee motivation is valuable, but it is never recorded in the accounts. Which assumption explains this?","monetary","Only what can be reliably expressed in money is recorded."],
+ ["The life of the business is cut into years (1 Jan–31 Dec) so performance can be reported and compared. Which assumption?","period","The accounting period assumption creates artificial intervals for reporting."],
+ ["A machine bought for €10,000 stays at €10,000 in the books even though it could now be sold for €8,000. Which principle (as in the course example)?","cost","Assets are recorded at original transaction cost, not current market value."],
+ ["A service is performed today and the customer will pay next month. Revenue is recorded today. Which principle?","revrec","Revenue is recognised when it is earned (performance done), not when cash is received."],
+ ["Goods sold in March: their cost of goods sold is also recorded in March. Which principle?","matching","Expenses are recorded in the same period as the revenues they helped generate."],
+ ["€3 of misplaced office supplies is ignored, but €3,000 of lost inventory is recorded and disclosed. Which principle?","materiality","Only information big enough to influence decisions must be strictly recorded or disclosed."],
+ ["The company used straight-line depreciation last year, so it uses straight-line again this year. Which principle?","consistency","The same methods are used from one period to the next, unless there is a good reason to change."],
+ ["Cash in the bank and inventory are examples of which element?","asset","Resources the business controls that are expected to bring future economic benefit."],
+ ["A bank loan and money owed to suppliers are examples of which element?","liability","Obligations to transfer economic resources in the future, because of past events."],
+ ["The owners’ residual claim on the assets, after all liabilities are settled, is…","equity","Assets − liabilities = equity."],
+ ["Electricity used and paid for this month is an example of which element?","expense","A decrease in equity from resources used to earn revenue."],
+ ["A cash sale to a customer increases cash and which other element?","revenue","Revenue is an increase in equity from normal operations."],
+ ["To increase an asset account such as Cash, you record a…","debit","Assets sit on the left of the equation and increase with debits."],
+ ["To increase a liability account such as Loans payable, you record a…","credit","Liabilities sit on the right of the equation and increase with credits."],
+ ["To increase a revenue account, you record a…","credit","Revenues extend equity, so they increase with credits."],
+ ["To increase an expense account such as Wages expense, you record a…","debit","Expenses reduce equity, so they increase with debits."],
+ ["What is the normal balance of an equity account?","credit","Equity, like liabilities, normally has a credit balance."],
+ ["Which statement shows assets, liabilities and equity at a single point in time?","bs","The balance sheet is a stock: a snapshot at the reporting date."],
+ ["Which statement shows revenues and expenses over a period, ending in profit or loss?","is","The income statement is a flow over the period, on an accrual basis."],
+ ["Which statement shows cash inflows and outflows, split into operating, investing and financing?","cfs","The cash flow statement explains the change in cash during the period."],
+ ["Paying employees’ salaries in cash is which type of cash flow?","operating","Salaries relate to the core day-to-day operations."],
+ ["Buying a new warehouse for cash is which type of cash flow?","investing","Investing = assets that will help the business operate in the future."],
+ ["Taking out a bank loan is which type of cash flow?","financing","Financing = raising money from, or returning it to, owners and lenders."],
+ ["Paying dividends to shareholders is which type of cash flow?","financing","Dividends return money to the owners."],
+ ["Which book records transactions in chronological order, with the accounts affected and a short explanation?","journal","The journal is the first formal record of each transaction."],
+ ["Which book organises transactions by account (not by date) and shows each account’s running balance?","ledger","Entries are posted from the journal to the ledger, account by account."],
+ ["Which list of all ledger balances checks that total debits equal total credits?","tb","The trial balance is a structural check of the two-sided system."],
+ ["Information that would change a user’s decision if they knew it has…","relevance","Relevance = capable of making a difference to decisions."],
+ ["Information that reflects the economic substance and is complete, neutral and free from material error has…","faithful","That is the definition of faithful representation."],
+ ["Users can compare a company with its competitors and with its own past years. Which enhancing characteristic?","comparability","Comparability lets users evaluate differences across firms and over time."],
+ ["Independent observers could broadly agree on how a number was derived. Which characteristic?","verifiability","Verifiability: knowledgeable, independent people would reach broadly the same result."],
+ ["An annual report published two years late has lost most of its decision value. Which characteristic is missing?","timeliness","Delayed information loses decision value."],
+ ["Wages earned by employees in December, to be paid in January, are recorded in December. Which adjustment group?","accrual","Activity happened this period but cash has not moved yet: an accrual (timing alignment)."],
+ ["Insurance paid in advance for 12 months is spread over the year it covers. Which adjustment group?","deferral","Cash moved earlier but the activity spans several periods: a deferral."],
+ ["The cost of a delivery van is spread over its 5-year useful life. Which adjustment group?","allocation","Depreciation allocates the cost over the periods that benefit."],
+ ["At year-end an allowance is recorded for customers who will probably not pay. Which adjustment group?","estimation","Bad-debt allowances are estimates of probable losses."],
+ ["Walmart, Aldi and Ryanair compete mainly through efficiency, scale and low prices. Which strategy?","costlead","Cost leadership: value at a lower cost than rivals, with lower margins and higher volumes."],
+ ["Apple, Ferrari and Rolex offer products perceived as superior or unique. Which strategy?","diff","Differentiation: higher margins, investment in brand and innovation, pricing power."],
+ ["Trains and videoconferencing compete with airlines for the same customer need. Which competitive force?","substitutes","Alternative solutions solve the same customer problem in a different way."],
+ ["A smartphone maker depends on a few advanced chip producers who can raise prices. Which competitive force?","suppliers","Few suppliers of scarce, hard-to-replace resources → high supplier power."],
+ ["Opening a coffee shop or an online store is easy, so high profits are hard to sustain. Which competitive force?","entrants","Low barriers to entry make it easy for new competitors to arrive."],
+ ["Where will the resources come from: owners, banks, bondholders or retained profits? This is the ___ decision.","financing","Financing decisions decide where resources come from and how investments are paid for."],
+ ["Amazon building fulfilment centres and cloud capacity is which type of business decision?","investing","Investing: sacrificing resources today for uncertain future benefits."],
+ ["Setting prices, staffing and choosing suppliers day to day is which type of business decision?","operating","Operating decisions are about running the business day to day."],
+ ["Investors and lenders cannot see what happens inside the business. This problem is called…","asym","Information asymmetry is the reason accounting is needed."],
+ ["Borrowing €5,000 increases cash and increases the loan payable. Every transaction has two effects. This is…","duality","Duality: every transaction affects the business in two ways, so the records stay balanced."],
+ ["A customer pays a full year’s subscription in advance. At that moment the company records cash and a…","contract","The service is still owed, so the cash creates a contract liability (unearned revenue)."],
+ ["(Cost − residual value) ÷ useful life is the formula for…","depreciation","Straight-line depreciation."],
+ ["A machine’s carrying amount is €100,000, but it can only recover €60,000. The €40,000 write-down is…","impairment","Impairment: carrying amount above recoverable amount → write-down."],
+ ["A manufacturer recognises the estimated cost of future repairs when it sells its products. This is a…","provision","A warranty provision: an estimated obligation recognised before it is paid."]
+],
+medium:[
+ ["Pay cash for inventory. What is the effect on the accounting equation?","aa","One asset (inventory) goes up and another (cash) goes down. Equity is unchanged."],
+ ["Buy inventory on credit. Effect on the equation?","alu","Inventory ↑ and accounts payable ↑."],
+ ["Repay part of the bank loan’s principal. Effect on the equation?","ald","Cash ↓ and loan payable ↓. Repaying principal is not an expense."],
+ ["Perform a service on credit; the customer will pay later. Effect on the equation?","aeu","Receivable ↑ and revenue (equity) ↑."],
+ ["Pay this month’s utilities bill in cash. Effect on the equation?","aed","Cash ↓ and an expense reduces equity."],
+ ["Staff have earned wages that are not yet paid at month-end. Effect on the equation?","led","Wages payable ↑ and wages expense reduces equity."],
+ ["Unused gift cards expire and are recognised as revenue. Effect on the equation?","leu","The obligation (liability) disappears and revenue increases equity."],
+ ["The company pays dividends to its owners in cash. Effect on the equation?","aed","Cash ↓ and equity ↓. Dividends reduce equity directly but are not an expense."],
+ ["Interest on a loan has built up but is not yet paid. Effect on the equation?","led","Interest payable ↑ and interest expense reduces equity."],
+ ["The owner contributes €3,000 of cash to the business. Effect on the equation?","aeu","Cash ↑ and equity ↑. It is not revenue, because it is not from normal operations."],
+ ["A company buys a delivery truck for cash. Which element increases?","asset","Buying a truck swaps one asset for another; it is not an expense.",["expense","equity","liability"]],
+ ["Dividends paid to shareholders directly reduce which element?","equity","Dividends reduce equity directly; they are not an expense.",["expense","liability","revenue"]],
+ ["Net income grows every year, but operating cash flow has been flat for three years. Which red flag?","rfcash","Profit not supported by operating cash: possible aggressive recognition or weak collections."],
+ ["Receivables grow 40% while sales grow 5%. Which red flag?","rfwc","Revenue may be booked but not collected (lenient credit, pushing goods)."],
+ ["Most of the company’s debt must be repaid or refinanced within the next few months. Which red flag?","rfstd","Liquidity stress: vulnerable to rate shocks or credit tightening."],
+ ["A “non-recurring” gain from selling assets appears in the results year after year. Which red flag?","rfone","Recurring one-offs may mask weak core profitability."],
+ ["In the last week of December, goods are shipped to customers who never ordered them. Which red flag?","rfcut","Recognising revenue early boosts this period at the expense of the next."],
+ ["Inventory grows much faster than sales, suggesting weak demand or obsolete stock. Which red flag?","rfwc","Inventory ↑ faster than sales: overproduction, weak demand or obsolete stock."],
+ ["Used special-purpose entities (SPEs) to keep debt off the balance sheet. Which case?","enron","Enron hid debt in SPEs that met technical rules but not economic substance."],
+ ["Capitalised routine line costs instead of expensing them, overstating profit by billions. Which case?","worldcom","WorldCom: an asset-vs-expense classification failure."],
+ ["Auditors could not obtain confirmation of the cash balances, which turned out to be fictitious. Which case?","wirecard","Wirecard (2020): verification and evidence failed."],
+ ["Reported profits and asset values while cash flows weakened, debt rose and covenants tightened, then collapsed in 2018. Which case?","carillion","Carillion: going concern applied while survival was in doubt."],
+ ["Manipulated percentage-of-completion estimates for years under cultural pressure (2015). Which case?","toshiba","Toshiba: estimates, governance and culture."],
+ ["Extended depreciation lives and capitalised costs that should have been expensed, making earnings look smooth (late 1990s). Which case?","waste","Waste Management shifted expenses into future periods."],
+ ["Adjusted (non-GAAP) earnings suggested improvement while GAAP losses and cash burn widened. Which case?","wework","WeWork: choices about what was “core”, “temporary” or “immaterial”."],
+ ["Book assets are modest compared with market value, because its user network, data and algorithms are internally generated. Which case?","meta","Meta: valuable intangibles that cannot be reliably measured stay off the balance sheet."],
+ ["Enron mainly shows the abuse of which assumption?","entity","The entity boundary was drawn so that debt and losses sat outside it.",["going","monetary","period"]],
+ ["Carillion mainly shows which assumption becoming fragile?","going","Profits and assets only made sense if the firm survived.",["entity","monetary","period"]],
+ ["WorldCom mainly shows a failure of which principle?","matching","Routine costs were capitalised instead of expensed against current revenue.",["cost","revrec","consistency"]],
+ ["Waste Management’s shifting of expenses into later years is, in the course, the example for which assumption?","period","Accounting period: timing judgments and incentives near period-end.",["entity","going","monetary"]],
+ ["Meta’s invisible network, data and talent illustrate which assumption?","monetary","Monetary measurement: only what can be reliably measured in money is recognised.",["entity","going","period"]],
+ ["A CEO’s sales forecast is highly relevant but hard to verify. Which fundamental characteristic is weak?","faithful","Relevant but not reliably represented information misleads.",["relevance","timeliness","comparability"]],
+ ["Historical cost is objective, but after many years it says little about current conditions. Which characteristic suffers?","relevance","Reliable but less relevant: the classic trade-off with historical cost.",["faithful","verifiability","neutrality"]],
+ ["Information that is not tailored to achieve a particular outcome, such as smooth earnings, is…","neutrality","Neutrality is part of faithful representation."],
+ ["Caution under uncertainty that prevents overstating assets and income, without becoming pessimistic, is…","prudence","Prudence is caution, not pessimism."],
+ ["An extra report would cost more to produce than the benefit users get from it, so it is not produced. Which constraint?","costbenefit","Information is provided only if its benefits exceed its costs."],
+ ["Statements are organised and explained so that informed users can follow them, without oversimplifying. Which characteristic?","understandability","Understandability: clear classification and disclosure, not oversimplification."],
+ ["Which book is “management’s first formal claim about what has occurred”?","journal","The journal is the entry gate: it fixes timing and classification downstream."],
+ ["The receivables balance rises sharply for three quarters. In which book does this pattern first become visible?","ledger","Running balances in the ledger reveal accumulation patterns."],
+ ["Work was done for a customer but never recorded. Which check still shows debits = credits and does not catch it?","tb","An omitted transaction leaves the trial balance balanced."],
+ ["A subscription was paid in advance; each month part of the contract liability becomes revenue. Which adjustment group?","deferral","Cash was received earlier and the service spans several periods."],
+ ["Interest on a loan built up during December and will be paid in January. Which adjustment group?","accrual","Expense incurred this period, cash not yet paid."],
+ ["A warranty provision is increased because failure rates are rising. Which adjustment group?","estimation","Provisions are estimates of probable obligations."],
+ ["Amortising the cost of software over 3 years is which adjustment group?","allocation","Amortisation spreads cost over the periods that benefit."],
+ ["“Should this event appear in the statements at all?” This is the question of…","recognition","Recognition is the gatekeeper."],
+ ["“At what amount should a recognised item be reported?” This is the question of…","measurement","Measurement: historical cost or current value."],
+ ["Where items appear and what the notes must explain is the layer of…","disclosure","Presentation & disclosure explain assumptions and uncertainty."],
+ ["Segregation of duties, authorisation procedures and reconciliations designed by management are…","controls","Internal controls are management’s responsibility."],
+ ["An independent professional gives reasonable, not absolute, confidence that statements are free from material misstatement. This is…","assurance","Assurance (external audit) reduces risk but never eliminates it."],
+ ["Reporting has two purposes: helping capital providers decide, and holding managers accountable for entrusted resources. The second is…","stewardship","Stewardship = accountability; the first purpose is decision usefulness.",["usefulness","assurance","controls"]],
+ ["How far reported earnings reflect economic performance and help predict future cash flows is called…","eqq","Earnings quality."],
+ ["Cash the company can freely use after all costs to keep running, including capex, is…","fcf","Free cash flow."],
+ ["NVIDIA lowers its estimate of customers who will not pay, and profit rises. Which account did it reduce?","allowance","A lower allowance for doubtful accounts means higher earnings, but more hidden cash risk.",["provision","depreciation","contract"]],
+ ["Many customers, similar products, low switching costs, or a few very large buyers. Which competitive force is strong?","customers","These conditions give customers bargaining power."]
+],
+hard:[
+ ["Collecting €20,000 from customers for sales recorded last month. Effect on the equation?","aa","Cash ↑ and receivables ↓. No revenue now: it was recognised at the sale.",["aeu","ald","leu"]],
+ ["Repaying a loan: €10,000 of principal plus €500 of interest. What is the effect of the €500 interest?","aed","Interest is an expense (cash ↓, equity ↓); the principal is just asset ↓ and liability ↓.",["ald","aa","led"]],
+ ["A creditor forgives part of the company’s debt. Effect on the equation?","leu","The liability disappears and a gain increases equity.",["ald","aeu","aa"]],
+ ["Paying a supplier for goods bought on credit last month. Effect on the equation?","ald","Cash ↓ and accounts payable ↓; the expense was not created by the payment.",["aed","aa","led"]],
+ ["A software company receives €240,000 for a 12-month contract and books it all as revenue on day one. What is missing from the balance sheet?","contract","Cash went up but 12 months of service are still owed: the contract liability is the missing second side.",["provision","allowance","equity"]],
+ ["€120,000 subscription received on 1 March, service delivered evenly over 12 months. How much revenue belongs to March?","€10,000","€120,000 ÷ 12 months = €10,000 a month.",["€120,000","€0","€110,000"]],
+ ["Same subscription: what is the contract liability at the end of March?","€110,000","11 months of service are still owed: €120,000 − €10,000.",["€120,000","€10,000","€0"]],
+ ["A machine costs €50,000, has a residual value of €5,000 and a useful life of 9 years. Annual straight-line depreciation?","€5,000","(€50,000 − €5,000) ÷ 9 = €5,000.",["€5,556","€4,500","€6,111"]],
+ ["Management extends useful lives from 5 to 10 years. What happens to this year’s profit and cash?","Profit ↑, cash unchanged","Lower depreciation raises profit; depreciation is not a cash flow.",["Profit ↑, cash ↑","Profit ↓, cash unchanged","No effect on either"]],
+ ["Depreciation barely changes despite heavy investment in new equipment. Which is a classic smoothing explanation?","Useful lives or residual values were increased","With big additions depreciation should rise, unless the assumptions changed (or repairs were capitalised, or impairments delayed).",["Revenue was recognised earlier","Dividends were cut","More debt was raised"]],
+ ["After a cyber-attack destroys €10m of inventory, management assumes nearly all of it can still be sold and expects a very optimistic insurance recovery. How do you classify this?","aggressive","Case A: delays loss recognition and overstates assets and profit now; violates neutrality and prudence."],
+ ["Management writes off only clearly spoiled inventory, bases the insurance recovery on the insurer’s evidence and discloses the uncertainty. How do you classify this?","informative","Case B: neutral, evidence-based, transparent about uncertainty."],
+ ["Management writes off stock that may still be saleable and books very pessimistic clean-up and disruption provisions. How do you classify this?","bigbath","Case C: depresses current earnings and creates artificial rebounds later."],
+ ["Why is a “big bath” misleading?","Later reversals create artificial profit rebounds","Excess provisions and write-offs today come back as gains or lower costs later.",["It overstates current profit","It breaks the accounting equation","It hides cash outflows from the CFS"]],
+ ["Wirecard’s statements respected going concern, periodicity and monetary measurement. What failed?","The principles (verification, faithful representation)","Assumptions held but principles failed: revenues and cash were recognised without credible evidence.",["The assumptions","Double entry: debits ≠ credits","Consistency of depreciation methods"]],
+ ["Intermarché: can revenue be recognised on the destroyed products, since the shops intended to sell them?","No: no performance obligation was satisfied","Revenue needs goods transferred to customers. Intention to sell is not enough.",["Yes, at cost","Yes, if they are insured","Only at year-end"]],
+ ["Intermarché: management switches the depreciation method of the damaged fridges to improve earnings. Which principle is breached?","consistency","Changes need a good reason and an explanation; damage calls for an impairment test, not a method change.",["matching","materiality","cost"]],
+ ["Intermarché: which principle decides whether the loss is shown separately rather than aggregated with other costs?","materiality","Minimal losses can be aggregated; massive losses must be reported separately.",["consistency","matching","cost"]],
+ ["Intermarché: on the day of the attack, how does the cash flow statement show the destroyed inventory?","No cash outflow yet","Events can affect earnings before cash. Later: insurance inflows, replacement outflows.",["Operating outflow of €10m","Investing outflow of €10m","Financing outflow of €10m"]],
+ ["Intermarché: lost customer confidence after the attack matters, but it is not recorded. Why?","monetary","It cannot be measured reliably in money.",["going","entity","period"]],
+ ["Intermarché: which question does the economic entity assumption raise?","Which losses belong to the supermarket?","Entity = the boundary of who is being reported on.",["Can the company continue operating?","Which period bears the loss?","Can lost confidence be measured?"]],
+ ["A credit sale of laptops for €50,000, delivered, 30-day terms. What does this period’s cash flow statement show?","Nothing yet: no cash moved","Revenue and receivables go up, but no cash has come in.",["Operating inflow of €50,000","Investing inflow of €50,000","Financing inflow of €50,000"]],
+ ["A €20m restructuring charge is called “one-off” and excluded from adjusted earnings for the fourth year in a row. Which principle is misapplied?","materiality","Course Case B: large enough to matter, and repeated exclusion is not credible (consistency suffers too).",["matching","cost","revrec"]],
+ ["A €50,000 legal settlement sits inside €500m of operating expenses and is not disclosed separately. Verdict?","Correct use of materiality","Insignificant relative to the cost base; separate disclosure would not change decisions.",["Misuse of materiality","Breach of consistency","Breach of matching"]],
+ ["Land bought for €1m is written up to €5m because management “believes” it is worth that. No sale took place. Which principle is violated?","cost","No verifiable transaction; reliability is sacrificed and investors cannot verify the number.",["materiality","revrec","consistency"]],
+ ["A machine’s carrying amount is €40,000; demand collapses and expected cash flows fall to €15,000. Management assumes a quick recovery and does nothing. What is being avoided?","impairment","Delaying the write-down keeps profit high now; a bigger impairment later reveals the deferred loss.",["depreciation","provision","allowance"]],
+ ["A costly branding campaign is recorded mostly as an asset, not an expense. Which principle is most at stake?","matching","Capitalising costs that support current revenue pushes them into future periods.",["cost","revrec","materiality"]],
+ ["What does a balanced trial balance prove?","Only that debits equal credits","It checks structure, not economic accuracy or completeness.",["That profit is correct","That no transaction is missing","That the estimates are neutral"]],
+ ["Which error WOULD the trial balance catch?","A debit posted with no matching credit","Omissions, wrong accounts and wrong periods all keep debits = credits.",["A transaction omitted entirely","A cost capitalised instead of expensed","Revenue recorded in the wrong period"]],
+ ["Unadjusted profit is strong; after adjusting entries (warranties, doubtful debts) it drops sharply. What does this mean?","Economic substance is finally reflected","Not an error: adjustments reveal obligations and expected losses that were invisible.",["A bookkeeping error was made","It proves fraud","Consistency was breached"]],
+ ["Which statement introduces no new judgments and reconciles accrual profit with the cash position?","cfs","The CFS reinterprets cash movements in light of the adjusted figures."],
+ ["Which is NOT one of the three recognition criteria?","Cash has been received","The criteria: meets an element definition, gives relevant information, can be faithfully represented.",["Meets the definition of an element","Provides relevant information","Can be faithfully represented"]],
+ ["Firm A builds its brand internally; Firm B buys a brand. Comparing the two, Firm B…","Shows more assets, even if the economics are similar","Bought intangibles are recognised; internally built ones are expensed and stay invisible.",["Is always less profitable","Is riskier by definition","Looks identical on the balance sheet"]],
+ ["A consumer-goods company reduces its bad-debt allowance during a recession. Effect?","Profit ↑ today, risk of write-offs later","Estimate manipulation: earnings up now, risk pushed into the future.",["Cash ↑ today","Profit ↓ today, cash ↑ later","No effect on profit"]],
+ ["A construction firm reports a project 70% complete in Q3, while site reports suggest 50%. Which judgment is driving earnings?","revrec","Revenue recognition timing: profit up, cash unchanged.",["matching","consistency","cost"]],
+ ["A media company capitalises content costs and amortises them over a long period. Which area of judgment is this?","Expense recognition vs capitalisation","Profit looks stable now; future periods bear the expense.",["Timing of revenue recognition","Estimating provisions and allowances","Assessing impairment"]],
+ ["A gym receives annual fees in advance. At year-end, part of the service is still owed. That part is which element?","liability","Unearned revenue is an obligation to perform.",["revenue","equity","asset"]],
+ ["Which assumption justifies the current vs non-current split and depreciating assets over many years?","going","These only make sense if the business is expected to continue.",["period","entity","monetary"]],
+ ["Airlines showed low debt on the balance sheet, but billions of lease commitments were visible elsewhere. Where?","Notes to the financial statements","True leverage risk was visible only in the notes.",["Auditor’s report","KPIs","Income statement"]],
+ ["Netflix warned of slower subscriber growth before it showed up in the numbers. In which part of the annual report?","MD&A","Management’s discussion and analysis carries forward-looking narrative and expectations.",["Trial balance","Accounting policies","Cash flow statement"]],
+ ["Who is responsible for designing internal controls?","Management","Controls are management’s; assurance is the auditor’s.",["The external auditors","The regulator","The shareholders"]],
+ ["Which of these increases equity but is NOT revenue?","The owner invests cash","Revenue comes from normal operations; owner investment is contributed capital.",["A cash sale","A service performed on credit","Unearned revenue that is now earned"]],
+ ["Which of these is NOT an expense?","Repaying loan principal","Principal repayment is asset ↓ and liability ↓. Interest, tax and electricity are expenses.",["Paying loan interest","Paying income tax","Electricity used"]],
+ ["Recording accrued wages at month-end: wages expense is debited. Wages payable is…","credit","A liability increases with a credit."],
+ ["Using up one month of prepaid insurance: insurance expense is debited. The prepaid insurance account is…","credit","The prepaid asset decreases, and assets decrease with credits."],
+ ["Which bias does the Conceptual Framework call as misleading as aggressive optimism?","bigbath","Unjustified pessimism distorts timing just like optimism.",["informative","prudence","neutrality"]],
+ ["Accounting is backward-looking. Which is NOT a reason the course gives for its predictive value?","Auditors guarantee future profits","The reasons: it reveals patterns, accruals embed expectations, and it has confirmatory value.",["It reveals patterns over time","Accruals embed expectations about the future","It confirms or corrects past expectations"]],
+ ["Unconsolidated joint ventures and SPEs carry large debts in the footnotes, while the firm reports low leverage. Which assumption is being stretched?","entity","Risks and obligations sit outside the reporting boundary.",["going","monetary","period"]],
+ ["A company reports record profits and goes bankrupt the next year. Which is the course’s main explanation?","Profit is not cash: it couldn’t pay its obligations","Profits can be shaped by accounting choices, and weak liquidity can sink a profitable firm.",["The auditors made an arithmetic error","Its revenues were too stable","It paid too little tax"]],
+ ["Subscription company: revenue soars, operating cash flow is flat, revenue is recognised earlier and marketing is capitalised. Most likely?","Aggressive accounting, not faster real growth","Recognition and matching choices reshape the trend without changing economic performance.",["Strong genuine growth","Excessive conservatism","A going-concern problem"]]
+]};
+/* ---------- extended bank ---------- */
+/* Hand-written: [question, answer key or literal, explanation, distractors, typed aliases for a literal] */
+var MORE={
+medium:[
+ ["Which user mainly checks liquidity, payment behaviour and signs of distress before offering trade credit?","Suppliers","Suppliers decide whether to supply and give credit, so they watch liquidity and default risk.",["Investors","Employees","Government"],["supplier"]],
+ ["Which user focuses on leverage, interest coverage, cash-flow stability and collateral?","Lenders","Lenders decide to grant, renew or call loans and set covenants.",["Customers","Competitors","Employees"],["lender","banks","bank"]],
+ ["Which user looks at business stability and ability to deliver reliably before committing to a long-term service relationship?","Customers","Customers care about going concern and reliable delivery.",["Lenders","Government","Financial analysts"],["customer"]],
+ ["Which user looks at taxable income and compliance with reporting standards?","Government","Tax assessment, compliance and market oversight.",["Suppliers","Owners","Competitors"],["tax authorities","state"]],
+ ["Which user benchmarks margins, cost structure and capex/R&D signals to decide pricing or market entry?","Competitors","Competitors use the statements for benchmarking.",["Investors","Lenders","Employees"],["competitor","rivals"]],
+ ["Which user mainly asks: should I stay, and how secure is my job?","Employees","Employees look at profitability, cash stability, growth and solvency.",["Owners","Suppliers","Government"],["employee","staff","workers"]],
+ ["Financial reports are “aggregated”. What is the cost of that?","Much of the underlying detail is lost","Summarising thousands of events into a few lines hides detail.",["They are no longer audited","They stop being in money terms","They can no longer be compared"]],
+ ["Financial accounting reports are primarily designed for…","Owners and lenders (capital providers)","They are general-purpose, but designed mainly for equity holders and providers of finance.",["Managers and employees","Customers and suppliers","Tax authorities"]],
+ ["Which is NOT a characteristic of financial accounting reports in the course?","Prepared mainly for managers’ internal decisions","They are general-purpose, aggregated, regulated and audited, monetary, and backward-looking with predictive value.",["General-purpose","Regulated and audited","Focused on monetary information"]],
+ ["Which of these is a transaction that gets recorded?","Selling goods for €200","A transaction is an economic event that affects the business and can be measured in money.",["A customer phones to ask a price","A manager guesses an asset’s value","Employees feel more motivated"]],
+ ["A supplier invoice can be recorded; a manager’s “guess” of value cannot. Which basic concept?","verifiability","Objective evidence / verifiability: transactions need proof.",["relevance","materiality","consistency"]],
+ ["Revenue increases equity through…","An asset ↑ or a liability ↓","Cash sale (asset ↑) or unearned revenue being earned (liability ↓).",["An asset ↓ or a liability ↑","An owner’s investment","A liability ↑ only"]],
+ ["Expenses decrease equity through…","An asset ↓ or a liability ↑","Cash paid (asset ↓) or a bill received on account (liability ↑).",["An asset ↑ or a liability ↓","A dividend","An asset ↑ only"]],
+ ["Retained earnings (cumulative) equal…","Revenues − expenses − dividends","Expanded equation: Assets = Liabilities + Contributed capital + Retained earnings.",["Revenues − expenses + dividends","Assets − liabilities","Cash − dividends"]],
+ ["Assets = Liabilities + Contributed capital + …","Retained earnings","The expanded accounting equation.",["Dividends","Revenue","Cash"],["retained earnings","retained profits"]],
+ ["“If the equation does not hold, something is wrong.” This is the equation’s role as…","A built-in error check","One of the six reasons the equation matters.",["A valuation tool","A forecast of cash","A disclosure requirement"]],
+ ["The income statement explains the change in which balance-sheet item?","Equity (through profit or loss)","BS at t0 → IS explains the change in equity → BS at t1.",["Cash","Total assets","Liabilities"]],
+ ["The cash flow statement explains the change in which balance-sheet item?","Cash and cash equivalents","Cash is one asset line; the CFS explains its movement.",["Equity","Retained earnings","Receivables"]],
+ ["Balance sheet is a ___; income statement and cash flow statement are ___.","Stock; flows","The BS is a snapshot; the IS and CFS cover a period.",["Flow; stocks","Stock; stocks","Flow; flows"]],
+ ["Items expected to be realised or settled within 12 months (or the operating cycle) are…","Current","Everything else is non-current.",["Non-current","Contingent","Deferred"],["current"]],
+ ["The current vs non-current split mainly signals…","Liquidity and solvency","Can the firm meet short-term obligations, and is it stable long-term?",["Profitability","Earnings quality","Market value"]],
+ ["Accounting “as a service”: the users are the…","Clients","The value of the service depends on whether it meets users’ needs.",["Auditors","Regulators","Managers"],["client"]],
+ ["Accounting information systems: identify and capture, record, analyse and interpret, and…","Report to suit users’ needs","The four common features of information systems.",["Audit the results","Tax the profits","Forecast share prices"]],
+ ["Which view of accounting shapes the entire course?","dtool","Decision usefulness and stewardship.",["service","language","infosystem"]],
+ ["Investors’ checklist: profitability, growth, free cash flow and…","eqq","Do profits reflect genuine performance?",["controls","materiality","assurance"]],
+ ["Managers’ checklist uses efficiency indicators such as…","Inventory turnover and receivables collection","Plus cost control and production-capacity signals.",["Interest coverage and leverage","Dividend yield","Share price"]],
+ ["Lenders’ checklist: can it repay under normal and stressed conditions? It looks at…","Liquidity, interest coverage and leverage","Lenders care about repayment capacity.",["Brand value and market share","Dividends and share buybacks","Employee satisfaction"]],
+ ["Breakdowns of revenue, inventory methods, leases, contingencies and pensions are in the…","Notes to the financial statements","Airlines’ lease commitments were visible there.",["Auditor’s report","KPIs","Governance information"],["notes"]],
+ ["FIFO vs weighted average, depreciation methods and areas of significant judgment are described in the…","Accounting policies","Tesla’s warranty assumptions are an example.",["MD&A","Risk factors","Segment information"],["accounting policies","policies"]],
+ ["Boeing disclosed its reliance on the 737 family before the grounding. In which part of the annual report?","Risk factor disclosures","Risk factors: regulation, cyber, supply chain, concentration.",["KPIs","Segment information","Auditor’s report"],["risk factors"]],
+ ["Apple’s growing reliance on China was visible early in which component?","Segment & geographic information","Revenue, profit and assets by segment or region.",["Risk factors","Governance information","Accounting policies"],["segment information","segments","geographic information"]],
+ ["Meta’s first-ever decline in daily active users was a warning in which component?","KPIs","Operational and non-GAAP metrics like DAUs, churn and backlog.",["Notes","Auditor’s report","Accounting policies"],["kpi","key performance indicators"]],
+ ["Johnson & Johnson’s litigation was disclosed before major settlements. Which component?","Commitments & contingencies","Unrecognised obligations: legal disputes, guarantees, environmental liabilities.",["MD&A","KPIs","Segment information"],["contingencies","commitments and contingencies"]],
+ ["Wells Fargo’s cross-selling incentives connect to which component?","Governance information","Board, audit committee, executive pay. Governance weakness often precedes reporting failures.",["Risk factors","KPIs","Notes"],["governance"]],
+ ["Emissions scandal exposed control failures in compliance and reporting (2015). Which case?","volkswagen","Volkswagen: internal-control and compliance failure."],
+ ["Cash received upfront → liability → revenue over the service period. Which company is the course’s example?","amazon","Amazon Prime."],
+ ["Volkswagen mainly illustrates…","controls","Internal control and compliance failure.",["assurance","materiality","going"]],
+ ["Tesla’s warranty claims rose, the provision was increased, and profit fell. Which concept?","provision","Warranty provisions rely on forward-looking repair-cost estimates.",["allowance","impairment","depreciation"]],
+ ["Apple assumes a longer useful life for its equipment. Effect?","Lower depreciation, higher profit, no cash effect","Useful lives are an assumption that moves profit, not cash.",["Higher depreciation, lower profit","More cash from operations","Higher asset impairment"]],
+ ["Netflix capitalises content costs and amortises them over viewing patterns. Which trade-off?","Faithful representation vs comparability","More faithful to its model, less comparable with traditional media.",["Relevance vs timeliness","Materiality vs consistency","Going concern vs period"]],
+ ["Which competitive force beat Blockbuster, Kodak and BlackBerry?","substitutes","Customers found better alternatives (streaming, digital, smartphones)."],
+ ["Peloton’s growth collapsed after gyms reopened. What lesson does the course draw?","Value creation is not one-time","Firms survive only while customers keep seeing value.",["Supplier power destroyed margins","Its accounts were fraudulent","It chose cost leadership"]],
+ ["Southwest, Walmart, Amazon and Ryanair show that, besides creating value, a firm needs…","Efficiency in delivering it","Value creation is necessary but not sufficient.",["A luxury brand","Many patents","Low taxes"]],
+ ["Uber earns its revenue mainly through…","Commissions on transactions","It owns few vehicles; it coordinates supply and demand.",["Subscriptions","Selling cars","Advertising"]],
+ ["“Customers buy benefits, not products.” The course’s example is…","People want a hole, not a drill","Airline ticket = transport, insurance = protection.",["People want coffee, not a café","People want cars, not roads","People want shares, not dividends"]],
+ ["According to the course, profit is…","A consequence of creating value for customers","Businesses do not primarily exist to make profit.",["The main reason businesses exist","Equal to cash generated","Guaranteed by past success"]],
+ ["Labour, knowledge, machinery, brands and financing are valuable mainly because they are…","Scarce","Resources are valuable because they are scarce.",["Cheap","Recorded at cost","Tax-deductible"],["scarce","scarcity"]],
+ ["Rolex vs Casio, Ryanair vs Emirates show that firms…","Serve different markets with different value","Firms choose whom to serve.",["Always compete on price","Have identical cost structures","Cannot coexist"]],
+ ["Business strategy + competitive environment = …","Business performance","Performance depends on what happens inside and around the firm.",["Revenue","Equity","Cash flow"],["performance","business performance"]],
+ ["Cost leadership typically leaves which financial trace?","Lower margins, higher volumes","Plus strong operational efficiency.",["Higher margins, lower volumes","High R&D spending","Large brand assets"]],
+ ["Large development cost, but almost no cost to serve one more customer. This describes a software firm’s…","Cost structure","The pattern of costs needed to run the business model.",["Revenue model","Value proposition","Market"],["cost structure"]],
+ ["Who the customers are, what value is offered, how it is delivered and how revenue and profit are earned: this is a…","Business model","It explains how the business sustains itself economically.",["Value chain","Cost structure","Strategy"],["business model"]],
+ ["Accounting reports the COST of acquiring resources. What is the real business question?","Do they generate future benefits that justify the sacrifice?","The heart of business decision-making.",["Were they bought at the lowest price?","Are they tax-deductible?","Can they be sold tomorrow?"]],
+ ["Profit ≠ cash ≠ growth. A profitable firm can still face…","Cash shortages","Profit, cash and growth are conceptually distinct.",["Negative revenue","Zero assets","No liabilities"]],
+ ["Who CAN usually observe the business’s internal activities?","Managers","Outsiders cannot: that is information asymmetry.",["Lenders","Investors","Suppliers"],["management","manager"]],
+ ["Three qualities the recording process ensures: traceability, internal consistency and…","comparability","Common conventions across firms under the same framework.",["faithful","timeliness","prudence"]],
+ ["Sources of judgment in accruals: estimates, assumptions, judgments. Apple’s useful lives are…","Assumptions","Beliefs about how long assets are used.",["Estimates","Judgments","Errors"]],
+ ["Tesla’s warranty provision is which source of judgment?","Estimates","An amount that cannot be known with certainty at the reporting date.",["Assumptions","Judgments","Errors"]],
+ ["Amazon Prime’s revenue recognised period by period is which source of judgment?","Judgments","An explicit judgment about performance obligations.",["Estimates","Assumptions","Errors"]],
+ ["“Should the event appear?”, “at what amount?”, “how is it organised and explained?” are, in order…","Recognition, measurement, presentation & disclosure","The three layers of what standards do.",["Measurement, recognition, disclosure","Disclosure, recognition, measurement","Recording, posting, balancing"]],
+ ["Which is “after the fact”: internal controls or assurance?","assurance","Controls work inside daily operations; the auditor evaluates afterwards.",["controls"]],
+ ["An audit gives reasonable assurance. It reduces risk but…","Never eliminates it","Wirecard and Carillion show audit failures.",["Guarantees no fraud","Replaces internal controls","Fixes the numbers"]],
+ ["SOX 404 attestations (Microsoft, Walmart) are about…","controls","Management’s internal control over reporting.",["assurance","materiality","going"]]
+],
+hard:[
+ ["Revenue was recognised too early (cash received, obligation not yet met). The TB still balances. What is understated?","Liabilities (deferred revenue)","Revenue is overstated and the contract liability is missing.",["Assets","Expenses","Cash"]],
+ ["An expense was incurred but not recorded. What is the effect?","Expenses and liabilities understated, profit overstated","The TB still balances because nothing was recorded.",["Assets and profit overstated","Revenue understated","No effect on profit"]],
+ ["A cost was capitalised instead of expensed. What is the effect?","Assets and profit overstated","Recorded, but in the wrong account (WorldCom).",["Liabilities overstated","Revenue understated","Cash understated"]],
+ ["Revenue was earned but never recorded. What is the effect?","Revenue and receivables understated","Omitted entirely, so the TB still balances.",["Revenue overstated","Liabilities understated","Cash overstated"]],
+ ["Adjusting entries are best described as…","Judgments about economic reality","Not new transactions and not bookkeeping error corrections.",["New business transactions","Corrections of posting errors","Cash movements at year-end"]],
+ ["The unadjusted trial balance is described in the course as…","Mechanically complete but economically unfinished","It tests structure, not judgment.",["The final basis for the statements","A valuation tool","A performance report"]],
+ ["In the six steps, where does accounting “become interpretation”?","The adjusted trial balance","It incorporates timing, allocation and estimation judgments.",["Journal entries","Posting to the ledger","The unadjusted trial balance"]],
+ ["Why does accrual revenue for Amazon Prime predict future cash better than the lumpy upfront cash?","It shows the recurring earning power","Revenue is spread as shipping and streaming are delivered.",["It is easier to audit","It increases cash","It avoids taxes"]],
+ ["NVIDIA’s hardware + support contracts mainly require judgment about…","The timing of revenue","Identifying performance obligations in multi-element contracts.",["The useful life of chips","The cost principle","Going concern"]],
+ ["Assumptions define ___; principles govern ___.","When information is meaningful; how events are recognised, measured and classified","The “analytical spine” of week 5.",["How events are measured; when they are meaningful","What is material; what is consistent","Which standards apply; which auditors sign"]],
+ ["In the financial statements, assumptions are usually…","Implicit","Principles, by contrast, directly shape earnings and the balance sheet.",["Listed as a separate statement","Audited separately","Optional"],["implicit"]],
+ ["In many scandals (Enron, Carillion, Wirecard), what was the problem?","Unreasonable assumptions treated as truths, or principles bent","Rules were often formally followed.",["The rules were openly ignored","Debits did not equal credits","No auditor was hired"]],
+ ["Going-concern doubts: which question should the analyst ask?","Would these values make sense if the firm had to liquidate?","Asset values and profits assume survival.",["Is depreciation straight-line?","Is revenue recognised at delivery?","Is materiality applied?"]],
+ ["Current values (fair value, value in use) are more ___ but rely on ___.","Relevant; estimates and models","Historic cost is verifiable but may lag.",["Reliable; invoices","Verifiable; market prices only","Conservative; auditors"]],
+ ["A retailer chooses a fiscal year-end right after its holiday peak. Which assumption does the course link this to?","period","The snapshot may not be representative.",["entity","going","monetary"]],
+ ["Sharp quarter-end revenue surges and persistent profit–cash divergence are warning signs linked to which assumption?","period","Incentives to accelerate revenue or delay expenses near period-end.",["entity","going","monetary"]],
+ ["Consolidated statements combine parent and controlled businesses and eliminate…","Intra-group transactions","They are presented as one entity.",["Minority shareholders","All liabilities","Foreign subsidiaries"]],
+ ["Delivery van bought for €30,000 with invoice and payment. Its market value later rises. The course’s verdict on keeping it at €30,000?","Correct: objective, verifiable, traceable","Case A of the cost principle.",["Wrong: it must be revalued up","Wrong: it breaks matching","Wrong: it is immaterial"]],
+ ["An honest impairment reduces current earnings but…","Improves the credibility of future earnings","Delaying it does the opposite.",["Increases cash","Raises equity","Breaks consistency"]],
+ ["Impairment testing asks whether the carrying amount is…","Recoverable through use or sale","If not, write it down.",["Equal to the original cost","Fully depreciated","Insured"]],
+ ["Revenue is recognised when…","Control of the goods or service passes to the customer","When performance obligations are satisfied.",["Cash is received","The contract is signed","The invoice is sent"]],
+ ["Signing a contract is ___ revenue; planning an expansion is ___ an asset.","Not automatically; not","Recognition requires that the event has progressed far enough.",["Always; always","Always; not","Not; always"]],
+ ["Materiality is…","A judgment in context (size, nature, implications)","Entity-specific; no universal threshold.",["A fixed 5% threshold","Set by the auditor only","The same for every firm"]],
+ ["Small adjustments can be material if they…","Affect trends, covenants or risk perceptions","Materiality depends on implications, not only size.",["Are below 1% of revenue","Are recorded in December","Have no cash effect"]],
+ ["Consistency does NOT require…","Never changing a method","Changes are allowed if justified and explained.",["Comparable periods","Explaining changes","Stable classifications"]],
+ ["How should analysts use GAAP earnings when a firm stresses non-GAAP numbers?","As an anchor, checking why adjusted figures depart from it","GAAP is the shared language; adjustments must be justified.",["Ignore GAAP, it is outdated","Average the two","Use whichever is higher"]],
+ ["High-quality earnings are…","Persistent, backed by cash, transparent","Low quality: optimistic assumptions, aggressive classifications.",["Smooth and always rising","Higher than peers","Above analyst forecasts"]],
+ ["Reported earnings should be treated as…","A hypothesis about performance","Not a conclusion.",["An audited fact","A cash amount","A market value"]],
+ ["Accounting standards are best described as…","Constraints within which judgment operates","They set thresholds and boundaries, rarely one numeric answer.",["Recipes with one correct number","Optional guidance","Tax rules"]],
+ ["Why can standards not eliminate judgment?","Business activity is complex, continuous and uncertain","Costs precede revenues and benefits span periods.",["Auditors forbid it","Managers refuse rules","IFRS is too short"]],
+ ["Where precise measurement is impossible, standards rely on…","Disclosure of assumptions, risks and sensitivities","Numbers alone are not enough.",["Leaving the item out","Using cash amounts only","The auditor’s estimate"]],
+ ["What does the Conceptual Framework do when standards are silent?","Provides the logic that guides judgment","It sits upstream of recognition and measurement.",["Gives a default number","Forbids recognition","Sends the case to the regulator"]],
+ ["Conceptual Framework → recognition & measurement logic → IFRS standards → accounting choices → …","eqq","Analysts evaluate earnings quality at the end of the flow.",["materiality","assurance","consistency"]],
+ ["Enhancing qualitative characteristics can…","Improve usability, not rescue misleading information","Relevance and faithful representation come first.",["Replace relevance","Fix faithful representation","Make any number reliable"]],
+ ["Does faithful representation require perfect accuracy?","No: estimates are fine if transparent and consistent","Free from material error, not from all uncertainty.",["Yes, always","Only for cash","Only for revenue"]],
+ ["Measurement uncertainty…","Does not invalidate information if disclosed","Estimates are acceptable when transparently derived.",["Always invalidates it","Must be eliminated","Is forbidden under IFRS"]],
+ ["Comparability does NOT require…","Identical treatment for different business models","Forcing identical methods can mislead.",["Consistency over time","Similar treatment of similar events","Clear disclosures"]],
+ ["Apple’s warranty provision: what would under-provisioning do?","Temporarily inflate performance","Profit now, cash cost later.",["Reduce current profit","Increase cash","Breach the entity assumption"]],
+ ["Tesla’s volatile earnings: the analyst separates volatility from business risk from volatility caused by…","Changing estimation assumptions","The second means lower earnings quality.",["Exchange rates only","Tax changes","Auditor rotation"]],
+ ["Boeing’s losses on long-term contracts test which characteristic most?","timeliness","Does management recognise losses promptly or delay them?",["comparability","understandability","verifiability"]],
+ ["Two firms report different numbers for similar events without breaking IFRS. Why?","Thresholds, estimation techniques or measurement bases differ","An “inconvenient truth” about comparability.",["One must be committing fraud","Auditors made errors","The TB did not balance"]],
+ ["Unjustified impairments today lead to…","Artificial rebounds later","Excessive conservatism distorts timing like optimism does.",["Higher cash today","Lower future depreciation only, nothing else","A going-concern problem"]],
+ ["Revising accounting estimates can…","Legitimately update information, or quietly manage trends","Revisions need scrutiny.",["Only ever be manipulation","Never affect profit","Only affect cash"]],
+ ["“Matching trap”: a manager delays a repair bill to next period. Effect this period?","Profit looks better","Delaying an expense improves period earnings and breaks matching.",["Cash increases","Revenue increases","Liabilities increase"]],
+ ["“Revenue mirage”: unordered goods shipped at year-end, knowing they’ll come back in January. Which principle is abused?","revrec","Revenue recognition abuse (channel stuffing).",["matching","materiality","consistency"]],
+ ["What does the course call the “truth serum”?","cfs","Cash is harder to fake than profit.",["is","bs"]],
+ ["Profits without cash for three years, receivables rising. Which is an innocent possible explanation?","Expansion on credit / working-capital investment","Then check whether cash generation improves later.",["Higher depreciation","Lower tax rate","More dividends"]],
+ ["“Where did this number come from?” Which is a REAL decision (not an accounting choice) that shapes revenue?","Pushing or postponing shipments","Real decisions change activity; accounting choices change how it is reported.",["Changing the returns estimate","Changing % of completion","Reclassifying an item"]],
+ ["Why are late journal entries with vague descriptions dangerous?","They hide whether an item is an asset or an expense, revenue or a liability","The journal fixes timing and classification for everything downstream.",["They break the TB","They are illegal","They change cash"]],
+ ["Contract liability roll-forward:","Opening + additions − releases = closing","Check that movements match billings and delivery.",["Opening − additions + releases = closing","Revenue − cash = closing","Cash + revenue = closing"]],
+ ["Recognition is not neutral because…","It decides what is visible and what stays off the balance sheet","Brand, talent and relationships often stay invisible.",["It is done by auditors","It ignores cash","It is always conservative"]],
+ ["“Measurement is not just arithmetic; it is…”","A narrative choice","Methods and estimates shape the reported story.",["A legal obligation","A cash amount","An auditor’s duty"]],
+ ["Intermarché: if an insurance recovery is probable and supported by evidence, which account appears?","Insurance receivable","An asset for the expected recovery.",["Unearned revenue","Warranty provision","Owner’s capital"],["insurance receivable"]],
+ ["Intermarché: where would you see the damaged fridges?","As PP&E impairment (BS and IS)","Damaged equipment is tested for impairment.",["As revenue","As a financing outflow","As unearned revenue"]],
+ ["Intermarché Case C (“big bath”) mainly violates…","neutrality","Unjustified pessimism is not neutral.",["materiality","consistency","period"]],
+ ["Intermarché Case A violates neutrality and…","prudence","It overstates assets and profit under uncertainty.",["materiality","comparability","timeliness"]],
+ ["Prudence is NOT…","Pessimism","It is caution under uncertainty.",["Caution","Avoiding overstatement","Evidence-based"],["pessimism"]],
+ ["€50m spent on brand and loyalty; no asset appears. Which risk for analysts?","Misleading comparisons between firms that buy vs build intangibles","Also: understated value and distorted profitability patterns.",["Overstated assets","Double-counted revenue","Breached going concern"]],
+ ["Relevance without reliability ___; reliability without relevance is ___.","Misleads; useless","Usefulness requires both.",["Is useless; misleading","Is fine; fine","Is fraud; illegal"]],
+ ["“Profitable but dying”: near insolvency, long-term liabilities may…","Need immediate settlement","Covenant breaches can overturn the classification.",["Disappear","Turn into equity","Become revenue"]],
+ ["Lower bad-debt allowance or warranty provision in a weak economy is a red flag for…","Estimate manipulation: profit now, risk later","Check consistency with business conditions and peers.",["Excessive conservatism","Going-concern failure","Consistency breach"]],
+ ["Large provisions or impairments with little evidence most likely signal…","bigbath","Later reversals create artificial rebounds.",["informative","aggressive"]],
+ ["Frequent reclassifications across periods and large year-end adjustments most likely signal…","Pressure to meet targets or smooth trends","Red flags in or near the books.",["Strong internal controls","Higher cash","Better comparability"]],
+ ["A perfectly consistent TB with vague, minimal disclosures means…","Internal consistency does not prove faithful representation","Balance is structural, not truthful.",["The statements are accurate","The audit is complete","There is no judgment"]],
+ ["Which statement is the reconciliation device between accrual profit and cash?","cfs","It reinterprets cash movements in light of adjusted figures.",["is","bs"]],
+ ["A company recognises 70% of a project’s revenue but cash received is 20%. What does the CFS show for the gap?","No cash inflow for the gap","Revenue and receivables (contract assets) rise without cash.",["An operating inflow","An investing inflow","A financing inflow"]]
+]};
+Object.keys(MORE).forEach(function(lv){MORE[lv].forEach(function(q){BANK[lv].push(q)})});
+
+/* Generated families: journal entries, equation effects, normal balances, cash-flow categories, elements, adjustments, numbers */
+(function(){
+var ACC={cash:["Cash",[]],cap:["Owner’s capital",["capital","share capital","owners capital","owner's capital"]],loan:["Loan payable",["loan","loans payable","bank loan"]],
+ equip:["Equipment",[]],ap:["Accounts payable",["payables","payable","trade payables"]],inv:["Inventory",["stock","inventories"]],rev:["Service revenue",["revenue","sales","sales revenue"]],
+ ar:["Accounts receivable",["receivables","receivable","trade receivables"]],rent:["Rent expense",[]],sal:["Salaries expense",["salary expense"]],div:["Dividends",[]],
+ unearned:["Unearned revenue",["contract liability","deferred revenue"]],prepaid:["Prepaid insurance",["prepaid"]],insexp:["Insurance expense",[]],wexp:["Wages expense",[]],
+ wpay:["Wages payable",[]],iexp:["Interest expense",[]],ipay:["Interest payable",[]],depexp:["Depreciation expense",[]],accdep:["Accumulated depreciation",[]],
+ cogs:["Cost of goods sold",["cogs","cost of sales"]],util:["Utilities expense",[]],irec:["Interest receivable",[]],irev:["Interest revenue",["interest income"]],
+ invloss:["Inventory loss (expense)",["inventory loss","inventory write off","loss"]],imp:["Impairment loss",[]],mach:["Machinery",[]],wexpw:["Warranty expense",[]],
+ wprov:["Warranty provision",["provision"]],bad:["Bad debt expense",[]],allow:["Allowance for doubtful accounts",["allowance"]],draw:["Owner’s drawings",["drawings","owner's drawings"]],
+ tax:["Tax expense",["income tax expense"]],gain:["Gain on debt forgiveness",["gain"]],sup:["Supplies",[]],supexp:["Supplies expense",[]],land:["Land",[]],re:["Retained earnings",[]]};
+var CONFL=[["div","draw"],["sal","wexp"],["invloss","imp"],["equip","mach"],["accdep","equip"],["accdep","mach"],["rev","irev"],["insexp","prepaid"]];
+function clash(a,b){return CONFL.some(function(p){return (p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a)})}
+var NAMES=Object.keys(ACC).filter(function(x){return x!=="re"});
+function accQ(lv,q,ans,other,expl){
+  var ds=[other];shuffle(NAMES).forEach(function(x){if(ds.length<3&&x!==ans&&x!==other&&!clash(x,ans)&&!clash(x,other))ds.push(x)});
+  BANK[lv].push([q,ACC[ans][0],expl,ds.map(function(x){return ACC[x][0]}),ACC[ans][1]]);
+}
+/* [transaction, debit, credit, equation effect, level for the entry, level for the equation, why] */
+var TX=[
+ ["The owner invests €20,000 of cash in the business","cash","cap","aeu","easy","medium","Cash (asset) ↑ is a debit; owner’s capital (equity) ↑ is a credit. It is not revenue."],
+ ["The business borrows €15,000 from the bank","cash","loan","alu","easy","medium","Cash ↑ (debit); loan payable ↑ (credit)."],
+ ["Buy equipment for €8,000 cash","equip","cash","aa","easy","medium","Equipment ↑ (debit), cash ↓ (credit). An asset swap, not an expense."],
+ ["Buy equipment for €8,000 on credit","equip","ap","alu","easy","medium","Equipment ↑ (debit); accounts payable ↑ (credit)."],
+ ["Buy inventory for €5,000 on credit","inv","ap","alu","easy","medium","Inventory ↑ (debit); accounts payable ↑ (credit)."],
+ ["Buy inventory for €5,000 cash","inv","cash","aa","easy","medium","Inventory ↑ (debit); cash ↓ (credit)."],
+ ["Perform services for €3,000 cash","cash","rev","aeu","easy","medium","Cash ↑ (debit); revenue ↑ (credit)."],
+ ["Perform services for €3,000 on credit","ar","rev","aeu","easy","medium","Receivable ↑ (debit); revenue ↑ (credit). No cash yet."],
+ ["Collect €3,000 from a customer for an earlier credit sale","cash","ar","aa","medium","hard","Cash ↑ (debit); receivable ↓ (credit). No new revenue: it was recognised at the sale."],
+ ["Pay €5,000 to a supplier for goods bought on credit","ap","cash","ald","medium","hard","Payable ↓ (debit); cash ↓ (credit). The payment is not an expense."],
+ ["Pay this month’s rent of €1,200","rent","cash","aed","easy","medium","Rent expense ↑ (debit); cash ↓ (credit)."],
+ ["Pay this month’s salaries of €4,000","sal","cash","aed","easy","medium","Salaries expense ↑ (debit); cash ↓ (credit)."],
+ ["Repay €2,000 of loan principal","loan","cash","ald","medium","medium","Loan payable ↓ (debit); cash ↓ (credit). Principal is not an expense."],
+ ["Pay €1,000 of dividends to the owners","div","cash","aed","medium","hard","Dividends reduce equity, so they are debited; cash ↓ is a credit. Not an expense."],
+ ["Receive €6,000 in advance for a service to be delivered next year","cash","unearned","alu","medium","medium","Cash ↑ (debit); unearned revenue (liability) ↑ (credit)."],
+ ["At year-end, €2,000 of a customer’s advance payment has now been earned","unearned","rev","leu","hard","hard","Unearned revenue (liability) ↓ is a debit; revenue ↑ is a credit."],
+ ["Pay €2,400 for 12 months of insurance in advance","prepaid","cash","aa","medium","medium","Prepaid insurance (asset) ↑ (debit); cash ↓ (credit). Not an expense yet."],
+ ["Use up one month (€200) of prepaid insurance","insexp","prepaid","aed","hard","hard","Insurance expense ↑ (debit); prepaid asset ↓ (credit)."],
+ ["Staff earned €3,000 of wages not yet paid at month-end","wexp","wpay","led","medium","medium","Wages expense ↑ (debit); wages payable ↑ (credit)."],
+ ["Pay last month’s €3,000 of accrued wages","wpay","cash","ald","hard","hard","The expense was recorded last month; now wages payable ↓ (debit) and cash ↓ (credit)."],
+ ["Accrue €150 of loan interest, to be paid next month","iexp","ipay","led","medium","hard","Interest expense ↑ (debit); interest payable ↑ (credit)."],
+ ["Record €1,000 of depreciation on equipment","depexp","accdep","aed","hard","hard","Depreciation expense ↑ (debit); accumulated depreciation ↑ (credit), reducing the equipment’s carrying amount. No cash moves."],
+ ["Record €2,500 of cost of goods sold for a sale","cogs","inv","aed","medium","medium","Cost of goods sold ↑ (debit); inventory ↓ (credit). Matching."],
+ ["Electricity of €300 was used this month; the bill is unpaid","util","ap","led","medium","hard","Utilities expense ↑ (debit); payable ↑ (credit)."],
+ ["€80 of interest was earned on a deposit, not yet received","irec","irev","aeu","hard","hard","Interest receivable ↑ (debit); interest revenue ↑ (credit). An accrued revenue."],
+ ["A cyber-attack destroys €10,000 of inventory","invloss","inv","aed","hard","hard","Inventory loss (expense) ↑ (debit); inventory ↓ (credit)."],
+ ["Impair a machine by €25,000","imp","mach","aed","hard","hard","Impairment loss ↑ (debit); machinery ↓ (credit)."],
+ ["Record a €1,500 warranty provision at the time of sale","wexpw","wprov","led","hard","hard","Warranty expense ↑ (debit); warranty provision (liability) ↑ (credit)."],
+ ["Record €900 of expected bad debts","bad","allow","aed","hard","hard","Bad debt expense ↑ (debit); allowance ↑ (credit), which reduces net receivables."],
+ ["The owner withdraws €500 of cash for personal use","draw","cash","aed","medium","hard","Drawings reduce equity (debit); cash ↓ (credit). Not an expense."],
+ ["Pay €4,000 of income tax","tax","cash","aed","medium","medium","Tax is an expense: debit tax expense, credit cash."],
+ ["A creditor forgives €3,000 of the loan","loan","gain","leu","hard","hard","Loan payable ↓ (debit); a gain (credit) increases equity."],
+ ["Buy €400 of supplies on credit","sup","ap","alu","easy","medium","Supplies (asset) ↑ (debit); accounts payable ↑ (credit)."],
+ ["Use €150 of supplies during the month","supexp","sup","aed","medium","hard","Supplies expense ↑ (debit); supplies (asset) ↓ (credit)."],
+ ["Buy land for €100,000 with a long-term bank loan (no cash)","land","loan","alu","medium","medium","Land ↑ (debit); loan payable ↑ (credit)."],
+ ["Pay €200 of interest in cash (not previously accrued)","iexp","cash","aed","medium","medium","Interest expense ↑ (debit); cash ↓ (credit)."]
+];
+TX.forEach(function(t){
+  accQ(t[4],"Journal entry: "+t[0]+". Which account is DEBITED?",t[1],t[2],t[6]);
+  accQ(t[4],"Journal entry: "+t[0]+". Which account is CREDITED?",t[2],t[1],t[6]);
+  BANK[t[5]].push([t[0]+". What is the effect on the accounting equation?",t[3],t[6]]);
+});
+/* normal balances: [account, normal side, kind, level] */
+var NB=[["cash","debit","an asset","easy"],["inv","debit","an asset","easy"],["ar","debit","an asset","easy"],["prepaid","debit","an asset","medium"],["equip","debit","an asset","easy"],["land","debit","an asset","easy"],
+ ["ap","credit","a liability","easy"],["loan","credit","a liability","easy"],["wpay","credit","a liability","medium"],["unearned","credit","a liability","medium"],["ipay","credit","a liability","medium"],["wprov","credit","a liability","hard"],
+ ["cap","credit","equity","easy"],["re","credit","equity","medium"],["rev","credit","a revenue","easy"],["irev","credit","a revenue","medium"],
+ ["rent","debit","an expense","easy"],["wexp","debit","an expense","easy"],["cogs","debit","an expense","medium"],["depexp","debit","an expense","medium"],["bad","debit","an expense","hard"],["imp","debit","an expense","hard"],["tax","debit","an expense","medium"],
+ ["div","debit","a reduction of equity","hard"],["draw","debit","a reduction of equity","hard"]];
+var UPLV={easy:"medium",medium:"hard",hard:"hard"};
+NB.forEach(function(n){
+  var nm=ACC[n[0]][0],opp=n[1]==="debit"?"credit":"debit";
+  BANK[n[3]].push(["What is the normal balance of “"+nm+"”?",n[1],nm+" is "+n[2]+", so it increases with a "+n[1]+" and normally has a "+n[1]+" balance."]);
+  BANK[UPLV[n[3]]].push(["To DECREASE “"+nm+"”, you record a…",opp,nm+" is "+n[2]+": it increases with a "+n[1]+", so it decreases with a "+opp+"."]);
+});
+/* cash-flow categories, including items with no cash flow at all */
+var CF=["Operating","Investing","Financing","No cash flow"];
+var CFA={"Operating":["operating","operating activities","operations"],"Investing":["investing","investing activities"],"Financing":["financing","financing activities"],"No cash flow":["none","no cash","no cash flow","not in the cfs","nothing","no cash movement"]};
+[["Cash received from customers","Operating","easy","Cash from the core business."],
+ ["Cash paid to suppliers for inventory","Operating","easy","Part of day-to-day operations."],
+ ["Rent paid for the shop","Operating","easy","An operating payment."],
+ ["Income tax paid","Operating","medium","Tax paid is part of operating cash flow in the course’s framework."],
+ ["Electricity bill paid","Operating","easy","An operating payment."],
+ ["Cash received in advance for annual subscriptions","Operating","medium","Customer cash for the core business is operating, even though revenue comes later."],
+ ["Paying 12 months of insurance in advance","Operating","medium","An operating payment, even though the expense is spread over the year."],
+ ["Purchase of a delivery van","Investing","easy","An asset that helps the business operate in the future."],
+ ["Purchase of a patent from another company","Investing","medium","Buying a long-term (intangible) asset."],
+ ["Sale of an old warehouse for cash","Investing","medium","Selling long-term assets is an investing inflow."],
+ ["Construction of a new fulfilment centre","Investing","easy","Investing in future capacity."],
+ ["Purchase of land for cash","Investing","easy","A long-term asset."],
+ ["Purchase of shares in another company as a long-term investment","Investing","medium","An investment in an asset, not financing of the company itself."],
+ ["Proceeds of a new bank loan","Financing","easy","Raising money from lenders."],
+ ["Repayment of loan principal","Financing","medium","Returning money to lenders."],
+ ["Owner contributes cash","Financing","easy","Raising money from owners."],
+ ["Issue of new shares for cash","Financing","easy","Raising money from owners."],
+ ["Dividends paid to shareholders","Financing","medium","Returning money to owners."],
+ ["Owner withdraws cash for personal use","Financing","hard","Returning money to the owner."],
+ ["Issue of bonds to investors","Financing","medium","Raising money from lenders."],
+ ["Depreciation expense for the year","No cash flow","hard","Depreciation is an allocation, not a cash movement."],
+ ["A credit sale not yet collected","No cash flow","hard","Revenue and receivables ↑, but no cash yet."],
+ ["Buying land with a bank loan paid directly to the seller","No cash flow","hard","No cash passed through the company."],
+ ["Recording a warranty provision","No cash flow","hard","Profit ↓ now; cash goes out later when repairs are made."],
+ ["Recording an impairment of a machine","No cash flow","hard","A write-down, not a payment."],
+ ["Wages earned but not yet paid at year-end","No cash flow","hard","Expense and liability now, cash later."],
+ ["Inventory destroyed in a cyber-attack (on the day of the attack)","No cash flow","hard","Events can hit earnings before cash."],
+ ["Paying wages that were accrued last year","Operating","hard","The cash leaves now, even though the expense was last year."],
+ ["Collecting a receivable from last year’s sale","Operating","hard","Cash from customers is operating, even though the revenue was last year."]
+].forEach(function(c){
+  BANK[c[2]].push([c[0]+": which part of the cash flow statement?",c[1],c[3],CF.filter(function(x){return x!==c[1]}),CFA[c[1]]]);
+});
+/* elements */
+[["Cash in the bank","asset","easy",""],["Inventory held for sale","asset","easy",""],["Amounts customers owe the business","asset","easy","Receivables: a right to future cash."],
+ ["Rent paid in advance for next year","asset","medium","A prepaid expense: a right to future use."],["A patent bought from another company","asset","medium","Bought intangibles are recognised as assets."],
+ ["Interest earned but not yet received","asset","medium","Interest receivable."],["A bank loan","liability","easy",""],["Amounts owed to suppliers","liability","easy",""],
+ ["Cash received for a service not yet delivered","liability","medium","Unearned revenue: an obligation to perform."],["Gift cards sold but not yet used","liability","hard","An obligation to deliver goods later."],
+ ["Wages earned by staff but not yet paid","liability","medium","Wages payable."],["Estimated future warranty repairs on products already sold","liability","hard","A provision."],
+ ["Taxes owed to the government","liability","easy",""],["The owner’s initial investment","equity","easy","Contributed capital."],["Profits kept in the business over the years","equity","medium","Retained earnings."],
+ ["Sales of goods to customers","revenue","easy",""],["Services delivered and billed this month","revenue","easy",""],["Gift cards that expired unused","revenue","hard","The obligation disappears and becomes revenue."],
+ ["Interest earned on a deposit","revenue","medium",""],["This month’s rent for using the shop","expense","easy",""],["Cost of the goods sold this month","expense","easy",""],
+ ["Depreciation of equipment","expense","medium","An allocation of cost."],["Expected losses from customers who will not pay","expense","hard","Bad debt expense."],
+ ["A write-down of a machine whose value collapsed","expense","hard","Impairment loss."],["Interest on a loan for the period","expense","medium",""],["Salaries earned by staff this month","expense","easy",""]
+].forEach(function(e){BANK[e[2]].push([e[0]+": which element?",e[1],e[3]||K[e[1]].l+"."])});
+/* adjustment groups */
+[["Wages earned in December, paid in January","accrual","medium"],["Interest accrued on a loan at year-end","accrual","medium"],["Consultancy hours worked in December, invoiced in January","accrual","hard"],
+ ["Utilities used in December; the bill arrives in January","accrual","medium"],["Interest earned on a deposit, not yet received","accrual","hard"],
+ ["Rent paid upfront for 6 months, spread over the months","deferral","medium"],["Part of an annual subscription received in advance is earned this month","deferral","medium"],
+ ["An annual software licence paid upfront, expensed over the year","deferral","hard"],["Gift cards sold this month, used next month","deferral","hard"],
+ ["Depreciation of a building","allocation","medium"],["Amortisation of a purchased patent","allocation","hard"],["Depreciation of a delivery van","allocation","medium"],
+ ["Allowance for doubtful accounts","estimation","medium"],["Warranty provision","estimation","medium"],["Impairment of a machine","estimation","hard"],
+ ["Write-down of obsolete inventory","estimation","hard"],["Provision for clean-up costs after the Intermarché attack","estimation","hard"],["Provision for a probable legal settlement","estimation","hard"]
+].forEach(function(a){BANK[a[2]].push(["Which group of adjusting entries? "+a[0]+".",a[1],K[a[1]].l+": "+({accrual:"activity happened, cash not yet moved.",deferral:"cash moved earlier, activity spans periods.",allocation:"spreading cost over the periods that benefit.",estimation:"recognising probable losses or obligations before settlement."})[a[1]]])});
+
+/* numbers, generated from a fixed seed so the bank is stable */
+var seed=20261027;function rnd(){seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296}
+function pick(a){return a[Math.floor(rnd()*a.length)]}
+function eur(n){return "€"+Math.round(n).toLocaleString("en-US")}
+var MON=["January","February","March","April","May","June","July","August","September","October","November","December"];
+function num(lv,q,ans,wrong,expl){
+  var opts=[];wrong.forEach(function(w){w=Math.round(w);if(w>=0&&w!==ans&&opts.indexOf(w)<0)opts.push(w)});
+  var step=Math.max(100,Math.round(ans*0.1/100)*100||100),i=1;while(opts.length<3){var c=ans+step*i*(i%2?1:-1);if(c>=0&&c!==ans&&opts.indexOf(c)<0)opts.push(c);i++}
+  BANK[lv].push([q,eur(ans),expl,opts.slice(0,3).map(eur),null,String(Math.round(ans))]);
+}
+var i;
+for(i=0;i<12;i++){var L=pick([3,4,5,6,8,10]),Dp=pick([1000,1500,2000,2500,3000,4000,5000,6000,7500,8000,10000,12000]),Rs=pick([1000,2000,3000,5000,6000,10000]),C=Rs+Dp*L;
+  num(i<6?"easy":"medium","A machine costs "+eur(C)+", has a residual value of "+eur(Rs)+" and a useful life of "+L+" years. Annual straight-line depreciation?",Dp,[C/L,(C+Rs)/L,Dp*L],"("+eur(C)+" − "+eur(Rs)+") ÷ "+L+" = "+eur(Dp)+". Don’t forget to subtract the residual value.");}
+for(i=0;i<8;i++){var L2=pick([5,6,8,10]),D2=pick([2000,2500,4000,5000,6000]),R2=pick([2000,4000,5000]),C2=R2+D2*L2,n=1+Math.floor(rnd()*(L2-2));
+  num("hard","Equipment cost "+eur(C2)+", residual value "+eur(R2)+", useful life "+L2+" years, straight-line. Carrying amount after "+n+" year"+(n>1?"s":"")+"?",C2-n*D2,[C2-n*C2/L2,n*D2,C2-(n+1)*D2],"Annual depreciation = ("+eur(C2)+" − "+eur(R2)+") ÷ "+L2+" = "+eur(D2)+". Carrying amount = "+eur(C2)+" − "+n+" × "+eur(D2)+" = "+eur(C2-n*D2)+".");}
+for(i=0;i<8;i++){var m=pick([100,150,200,250,300,400,500,800,1000]),s=2+Math.floor(rnd()*10),k=13-s,P=12*m;
+  num(i<4?"medium":"hard","A customer pays "+eur(P)+" on 1 "+MON[s-1]+" for 12 months of service. Year-end is 31 December. Revenue to recognise this year?",m*k,[P,m*(k-1),P-m*k],eur(P)+" ÷ 12 = "+eur(m)+" a month × "+k+" months (from "+MON[s-1]+" to December) = "+eur(m*k)+".");
+  num(i<4?"medium":"hard","A customer pays "+eur(P)+" on 1 "+MON[s-1]+" for 12 months of service. Year-end is 31 December. Contract liability at year-end?",P-m*k,[P,m*k,P-m*(k-1)],(12-k)+" months are still owed: "+(12-k)+" × "+eur(m)+" = "+eur(P-m*k)+".");}
+for(i=0;i<4;i++){var m2=pick([100,200,300,500]),s2=2+Math.floor(rnd()*10),k2=13-s2,P2=12*m2;
+  num("medium","The company pays "+eur(P2)+" on 1 "+MON[s2-1]+" for 12 months of insurance. Year-end 31 December. Insurance expense this year?",m2*k2,[P2,P2-m2*k2,m2*(k2+1)],eur(m2)+" a month × "+k2+" months = "+eur(m2*k2)+". The rest is still a prepaid asset.");
+  num("hard","The company pays "+eur(P2)+" on 1 "+MON[s2-1]+" for 12 months of insurance. Year-end 31 December. Prepaid insurance on the balance sheet?",P2-m2*k2,[P2,m2*k2,0],(12-k2)+" months of cover remain: "+eur(P2-m2*k2)+".");}
+for(i=0;i<12;i++){var Lb=1000*(5+Math.floor(rnd()*80)),Eq=1000*(5+Math.floor(rnd()*80)),A=Lb+Eq,w=i%3;
+  if(w===0)num(i<6?"easy":"medium","Assets are "+eur(A)+" and liabilities are "+eur(Lb)+". Equity?",Eq,[A+Lb,Lb,A],"Equity = assets − liabilities = "+eur(Eq)+".");
+  else if(w===1)num(i<6?"easy":"medium","Liabilities are "+eur(Lb)+" and equity is "+eur(Eq)+". Total assets?",A,[Math.abs(Lb-Eq),Lb,Eq*2],"Assets = liabilities + equity = "+eur(A)+".");
+  else num(i<6?"easy":"medium","Assets are "+eur(A)+" and equity is "+eur(Eq)+". Liabilities?",Lb,[A+Eq,Eq,A],"Liabilities = assets − equity = "+eur(Lb)+".");}
+for(i=0;i<8;i++){var O=1000*(10+Math.floor(rnd()*90)),N=1000*(5+Math.floor(rnd()*40)),Dv=1000*(1+Math.floor(rnd()*5));
+  num("medium","Opening retained earnings "+eur(O)+", net income "+eur(N)+", dividends "+eur(Dv)+". Closing retained earnings?",O+N-Dv,[O+N+Dv,O+N,N-Dv],eur(O)+" + "+eur(N)+" − "+eur(Dv)+" = "+eur(O+N-Dv)+". Dividends reduce retained earnings but are not an expense.");}
+for(i=0;i<8;i++){var Sa=1000*(20+Math.floor(rnd()*80)),Co=Math.round(Sa*pick([.4,.5,.6,.7,.75])/1000)*1000,w2=i%3;
+  if(w2===0)num("medium","This year: credit sales of "+eur(Sa)+", of which "+eur(Co)+" was collected. Revenue for the year?",Sa,[Co,Sa-Co,Sa+Co],"Revenue is recognised when earned: "+eur(Sa)+", regardless of collection.");
+  else if(w2===1)num("medium","This year: credit sales of "+eur(Sa)+", of which "+eur(Co)+" was collected. Cash received from customers?",Co,[Sa,Sa-Co,Sa+Co],"Only "+eur(Co)+" of cash came in. Profit ≠ cash.");
+  else num("hard","This year: credit sales of "+eur(Sa)+", of which "+eur(Co)+" was collected (no opening receivables). Receivables at year-end?",Sa-Co,[Sa,Co,Sa+Co],eur(Sa)+" − "+eur(Co)+" = "+eur(Sa-Co)+" still owed by customers.");}
+for(i=0;i<8;i++){var CA=1000*(20+Math.floor(rnd()*80)),up=i%4===0,RA=up?CA+1000*(5+Math.floor(rnd()*20)):Math.round(CA*pick([.3,.5,.6,.75])/1000)*1000;
+  num("hard","An asset’s carrying amount is "+eur(CA)+"; its recoverable amount is "+eur(RA)+". Impairment loss to recognise?",up?0:CA-RA,up?[RA-CA,RA,CA]:[RA,CA,CA+RA],up?"No impairment: the recoverable amount is above the carrying amount, and the cost principle does not allow writing the asset up.":"Carrying amount − recoverable amount = "+eur(CA-RA)+".");}
+for(i=0;i<8;i++){var Rv=1000*(50+Math.floor(rnd()*150)),Xp=Math.round(Rv*pick([.6,.7,.8,.85])/1000)*1000,Dd=1000*(2+Math.floor(rnd()*8)),Pp=1000*(3+Math.floor(rnd()*10));
+  num("hard","Revenue "+eur(Rv)+", expenses "+eur(Xp)+", dividends paid "+eur(Dd)+", loan principal repaid "+eur(Pp)+". Net income?",Rv-Xp,[Rv-Xp-Dd,Rv-Xp-Dd-Pp,Rv-Xp-Pp],"Net income = revenue − expenses = "+eur(Rv-Xp)+". Dividends and loan principal are not expenses.");}
+for(i=0;i<6;i++){var Op=1000*(20+Math.floor(rnd()*60)),Bi=1000*(30+Math.floor(rnd()*70)),Rl=1000*(20+Math.floor(rnd()*60));
+  num("hard","Contract liability: opening "+eur(Op)+", new billings received in advance "+eur(Bi)+", revenue released "+eur(Rl)+". Closing balance?",Op+Bi-Rl,[Op-Bi+Rl,Bi-Rl,Op+Bi],"Roll-forward: opening + additions − releases = "+eur(Op+Bi-Rl)+".");}
+})();
+
+var LEVELS=[["easy","Easy","Definitions applied, basic entries, the equation"],["medium","Medium","Equation effects, adjustments, red flags, cases, annual report"],["hard","Hard","Traps, tricky entries, numbers, Intermarché, framework"]];
+var MODES=[["mc","Multiple choice","Boxes, pick one (keys 1–4)"],["write","Typed answer","Type the name of the concept"]];
+
+/* ---------- screens ---------- */
+var SCREENS=["home","defs","memo","setup","quiz","end"];
+function show(id){SCREENS.forEach(function(x){$(x).hidden=x!==id});if(id!=="memo")stopTimer();window.scrollTo(0,0)}
+document.querySelectorAll("[data-go]").forEach(function(b){b.addEventListener("click",function(){go(b.dataset.go)})});
+function go(id){show(id);if(id==="memo")memoView(memoMode);if(id==="setup")renderSetup()}
+
+var level=store("ledger-level")||"easy",mode=store("ledger-mode")||"mc";
+function chipRow(box,list,val,set){
+  box.innerHTML="";
+  list.forEach(function(it){var b=document.createElement("button");b.type="button";b.className="chip";b.setAttribute("aria-pressed",it[0]===val);
+    b.innerHTML="<b></b><small></small>";b.firstChild.textContent=it[1];b.lastChild.textContent=it[2];b.onclick=function(){set(it[0])};box.appendChild(b)});
+}
+function renderSetup(){
+  chipRow($("levels"),LEVELS,level,function(v){level=v;store("ledger-level",v);renderSetup()});
+  chipRow($("modes"),MODES,mode,function(v){mode=v;store("ledger-mode",v);renderSetup()});
+  $("disc").hidden=mode!=="write";
+  var n=guessItems(level,mode).length,b=store("ledger-best-"+level+"-"+mode);
+  $("guessBest").textContent=n+" questions in this level and mode. "+(b?"Best score: "+b+".":"No score yet.");
+}
+$("guessGo").onclick=function(){startQuiz(level,mode)};
+
+function guessItems(lv,m){
+  var name=LEVELS.filter(function(l){return l[0]===lv})[0][1];
+  function typable(q){return K[q[1]]?K[q[1]].t:!!(q[4]||q[5])}
+  return BANK[lv].filter(function(q){return m!=="write"||typable(q)}).map(function(q){
+    var isKey=!!K[q[1]],opts;
+    if(isKey)opts=shuffle([q[1]].concat(distractors(q[1],q[3]))).map(keyOpt);
+    else opts=shuffle([q[1]].concat(q[3])).map(function(s){return {id:s,main:s}});
+    return {tag:name,html:'<p class="qtext">'+esc(q[0])+'</p>',options:opts,answer:q[1],
+      answerText:isKey?K[q[1]].l:q[1],accept:isKey?accepts(q[1]):[q[1]].concat(q[4]||[]).map(norm),num:q[5]||null,expl:q[2],raw:q[0]};
+  });
+}
+
+/* ---------- quiz engine ---------- */
+var ROUND=10,S=null;
+function startQuiz(ctx,m){
+  var pool=ctx==="defs"?defsItems():ctx==="falta"?faltaItems():guessItems(ctx,m);
+  S={ctx:ctx,mode:m,items:shuffle(pool).slice(0,ROUND),i:0,score:0,streak:0,right:0,missed:[],locked:false};
+  show("quiz");renderQ();
+}
+function renderHud(){$("hQ").textContent=(S.i+1)+"/"+S.items.length;$("hS").textContent=S.score;$("hK").textContent=S.streak;$("hBar").style.width=(100*S.i/S.items.length)+"%"}
+function renderQ(){
+  var it=S.items[S.i];S.locked=false;
+  $("qTag").textContent=it.tag+(S.mode==="write"?" · typed answer":"");
+  $("qPrompt").innerHTML=it.html;$("fb").hidden=true;
+  var box=$("opts");box.innerHTML="";
+  if(S.mode==="mc"){
+    box.hidden=false;$("wForm").hidden=true;
+    it.options.forEach(function(o,n){
+      var b=document.createElement("button");b.type="button";b.className="opt"+(o.long?" long":"");b.dataset.id=o.id;
+      b.innerHTML='<span class="k">'+(n+1)+'</span><span class="t">'+(o.sub?"<small>"+esc(o.sub)+"</small>":"")+"<span>"+esc(o.main)+"</span></span>";
+      b.onclick=function(){choose(o.id)};box.appendChild(b);
+    });
+  }else{
+    box.hidden=true;$("wForm").hidden=false;var inp=$("wInput");inp.value="";inp.disabled=false;
+    setTimeout(function(){inp.focus({preventScroll:true})},30);
+  }
+  renderHud();
+}
+function choose(id){
+  if(S.locked)return;
+  var it=S.items[S.i];
+  document.querySelectorAll("#opts .opt").forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.id===it.answer)b.classList.add("right");else if(b.dataset.id===id)b.classList.add("wrong");else b.classList.add("dim");
+  });
+  result(id===it.answer,"");
+}
+$("wForm").addEventListener("submit",function(e){
+  e.preventDefault();if(S.locked)return;
+  var inp=$("wInput"),raw=inp.value.trim();
+  if(!raw){inp.classList.remove("shake");void inp.offsetWidth;inp.classList.add("shake");return}
+  inp.disabled=true;var it=S.items[S.i];
+  result(it.num?raw.replace(/[^0-9]/g,"")===it.num:it.accept.indexOf(norm(raw))>=0,"You wrote: “"+raw+"”.");
+});
+function result(ok,note){
+  S.locked=true;var it=S.items[S.i],fb=$("fb");
+  fb.className="fb "+(ok?"good":"bad");
+  if(ok){var pts=100+S.streak*20;S.score+=pts;S.streak++;S.right++;$("fbT").textContent="Correct! +"+pts}
+  else{S.streak=0;S.missed.push(it);$("fbT").textContent="Not quite"}
+  $("fbN").hidden=ok||!note;$("fbN").textContent=note;
+  $("fbA").hidden=ok;$("fbA").innerHTML=ok?"":"Answer: <b>"+esc(it.answerText)+"</b>";
+  $("fbE").textContent=it.expl;
+  $("nextBtn").textContent=S.i>=S.items.length-1?"See results":"Next";
+  fb.hidden=false;renderHud();
+  setTimeout(function(){$("nextBtn").focus({preventScroll:true});fb.scrollIntoView({block:"nearest",behavior:"smooth"})},40);
+}
+function advance(){if(!S||!S.locked)return;if(S.i>=S.items.length-1)return finish();S.i++;renderQ();$("quiz").scrollIntoView({block:"start"})}
+$("nextBtn").onclick=advance;
+$("quit").onclick=function(){go(S&&S.ctx==="defs"?"defs":S&&S.ctx==="falta"?"memo":"setup")};
+function finish(){
+  show("end");
+  var key="ledger-best-"+S.ctx+"-"+S.mode,prev=parseInt(store(key)||"0",10),rec=S.score>prev;
+  if(rec)store(key,String(S.score));
+  var title={defs:"Definitions quiz",falta:"Which one is missing?"}[S.ctx]||("Name that concept · "+LEVELS.filter(function(l){return l[0]===S.ctx})[0][1]);
+  var pct=S.right/S.items.length;
+  $("endTitle").textContent=title+(pct===1?": perfect!":pct>=.7?": well done":pct>=.5?": nearly there":": review time");
+  $("endScore").textContent=S.score;
+  $("endStats").innerHTML="<span>Correct <b>"+S.right+"/"+S.items.length+"</b></span><span>"+(rec?"<b>New record!</b>":"Record <b>"+prev+"</b>")+"</span>";
+  var box=$("reviewBox");box.innerHTML="";
+  if(!S.missed.length){var p=document.createElement("p");p.textContent=(S.ctx==="easy"||S.ctx==="medium")?"No mistakes. Try the next level.":"No mistakes.";box.appendChild(p);return}
+  var h=document.createElement("h3");h.textContent="To review";box.appendChild(h);
+  var ul=document.createElement("ul");ul.className="review";
+  S.missed.forEach(function(it){
+    var li=document.createElement("li");
+    li.innerHTML=(it.raw?'<p class="qtext"></p>':it.html)+'<p class="ra"></p><p class="small"></p>';
+    if(it.raw)li.querySelector(".qtext").textContent=it.raw;
+    li.querySelector(".ra").textContent="→ "+it.answerText;li.querySelector(".small").textContent=it.expl;
+    ul.appendChild(li);
+  });
+  box.appendChild(ul);
+}
+$("again").onclick=function(){startQuiz(S.ctx,S.mode)};
+document.addEventListener("keydown",function(e){
+  if($("quiz").hidden||!S)return;
+  if(!S.locked&&S.mode==="mc"&&/^[1-4]$/.test(e.key)){var o=S.items[S.i].options[+e.key-1];if(o){e.preventDefault();choose(o.id)}}
+  else if(S.locked&&e.key==="Enter"&&document.activeElement!==$("nextBtn")){e.preventDefault();advance()}
+});
+
+renderDefs();renderSetup();
+})();
+</script>
+
+</body></html>
