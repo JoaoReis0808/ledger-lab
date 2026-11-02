@@ -375,7 +375,7 @@ var D=[
  ["Adjusting entries","deferral","Cash moved earlier, but the activity spans several periods.","Spreads amounts already recorded over the periods they belong to.","Prepaid insurance; unearned (deferred) revenue."],
  ["Adjusting entries","allocation","Spreading the cost of long-lived assets over the periods that benefit.","Expenses follow consumption, not payment; relies on useful lives and residual values.","Depreciation and amortisation."],
  ["Adjusting entries","estimation","Recognising probable losses and obligations before they are settled in cash.","The most judgment-heavy area, where managerial discretion is greatest.","Bad-debt allowances, warranty provisions, impairments."],
- ["Statements","bs","Assets, liabilities and equity at a point in time (a stock, a snapshot).","Answers: what does the firm own and owe, and can it meet its obligations?","NVIDIA: assets $111.6bn = liabilities $32.3bn + equity $79.3bn."],
+ ["Statements","bs","Assets, liabilities and equity at a point in time (a stock, a snapshot).","Answers: what does the firm own and owe, and can it meet its obligations?","Assets €500k = liabilities €200k + equity €300k."],
  ["Statements","is","Revenues and expenses on an accrual basis over a period, giving profit or loss (a flow).","Answers: is the strategy generating wealth sustainably?","Revenue, margins, cost discipline."],
  ["Statements","cfs","Cash inflows and outflows over a period, split into operating, investing and financing.","Cash is hard to fake. It introduces no new judgments and reconciles accrual profit with cash.","Credit sale: revenue in the IS, nothing in the CFS yet."],
  ["Standards, credibility and quality","recognition","Should this event appear in the statements? It must meet an element definition, give relevant information and be faithfully representable.","The gatekeeper: decides what is visible and what stays off the balance sheet.","A pending lawsuit may only be disclosed in the notes."],
@@ -594,18 +594,6 @@ medium:[
  ["A “non-recurring” gain from selling assets appears in the results year after year. Which red flag?","rfone","Recurring one-offs may mask weak core profitability."],
  ["In the last week of December, goods are shipped to customers who never ordered them. Which red flag?","rfcut","Recognising revenue early boosts this period at the expense of the next."],
  ["Inventory grows much faster than sales, suggesting weak demand or obsolete stock. Which red flag?","rfwc","Inventory ↑ faster than sales: overproduction, weak demand or obsolete stock."],
- ["Used special-purpose entities (SPEs) to keep debt off the balance sheet. Which case?","enron","Enron hid debt in SPEs that met technical rules but not economic substance."],
- ["Capitalised routine line costs instead of expensing them, overstating profit by billions. Which case?","worldcom","WorldCom: an asset-vs-expense classification failure."],
- ["Auditors could not obtain confirmation of the cash balances, which turned out to be fictitious. Which case?","wirecard","Wirecard (2020): verification and evidence failed."],
- ["Reported profits and asset values while cash flows weakened, debt rose and covenants tightened, then collapsed in 2018. Which case?","carillion","Carillion: going concern applied while survival was in doubt."],
- ["Manipulated percentage-of-completion estimates for years under cultural pressure (2015). Which case?","toshiba","Toshiba: estimates, governance and culture."],
- ["Extended depreciation lives and capitalised costs that should have been expensed, making earnings look smooth (late 1990s). Which case?","waste","Waste Management shifted expenses into future periods."],
- ["Adjusted (non-GAAP) earnings suggested improvement while GAAP losses and cash burn widened. Which case?","wework","WeWork: choices about what was “core”, “temporary” or “immaterial”."],
- ["Book assets are modest compared with market value, because its user network, data and algorithms are internally generated. Which case?","meta","Meta: valuable intangibles that cannot be reliably measured stay off the balance sheet."],
- ["Enron mainly shows the abuse of which assumption?","entity","The entity boundary was drawn so that debt and losses sat outside it.",["going","monetary","period"]],
- ["Carillion mainly shows which assumption becoming fragile?","going","Profits and assets only made sense if the firm survived.",["entity","monetary","period"]],
- ["WorldCom mainly shows a failure of which principle?","matching","Routine costs were capitalised instead of expensed against current revenue.",["cost","revrec","consistency"]],
- ["Waste Management’s shifting of expenses into later years is, in the course, the example for which assumption?","period","Accounting period: timing judgments and incentives near period-end.",["entity","going","monetary"]],
  ["Meta’s invisible network, data and talent illustrate which assumption?","monetary","Monetary measurement: only what can be reliably measured in money is recognised.",["entity","going","period"]],
  ["A CEO’s sales forecast is highly relevant but hard to verify. Which fundamental characteristic is weak?","faithful","Relevant but not reliably represented information misleads.",["relevance","timeliness","comparability"]],
  ["Historical cost is objective, but after many years it says little about current conditions. Which characteristic suffers?","relevance","Reliable but less relevant: the classic trade-off with historical cost.",["faithful","verifiability","neutrality"]],
@@ -646,7 +634,6 @@ hard:[
  ["Management writes off only clearly spoiled inventory, bases the insurance recovery on the insurer’s evidence and discloses the uncertainty. How do you classify this?","informative","Case B: neutral, evidence-based, transparent about uncertainty."],
  ["Management writes off stock that may still be saleable and books very pessimistic clean-up and disruption provisions. How do you classify this?","bigbath","Case C: depresses current earnings and creates artificial rebounds later."],
  ["Why is a “big bath” misleading?","Later reversals create artificial profit rebounds","Excess provisions and write-offs today come back as gains or lower costs later.",["It overstates current profit","It breaks the accounting equation","It hides cash outflows from the CFS"]],
- ["Wirecard’s statements respected going concern, periodicity and monetary measurement. What failed?","The principles (verification, faithful representation)","Assumptions held but principles failed: revenues and cash were recognised without credible evidence.",["The assumptions","Double entry: debits ≠ credits","Consistency of depreciation methods"]],
  ["Intermarché: can revenue be recognised on the destroyed products, since the shops intended to sell them?","No: no performance obligation was satisfied","Revenue needs goods transferred to customers. Intention to sell is not enough.",["Yes, at cost","Yes, if they are insured","Only at year-end"]],
  ["Intermarché: management switches the depreciation method of the damaged fridges to improve earnings. Which principle is breached?","consistency","Changes need a good reason and an explanation; damage calls for an impairment test, not a method change.",["matching","materiality","cost"]],
  ["Intermarché: which principle decides whether the loss is shown separately rather than aggregated with other costs?","materiality","Minimal losses can be aggregated; massive losses must be reported separately.",["consistency","matching","cost"]],
@@ -677,8 +664,6 @@ hard:[
  ["Which of these is NOT an expense?","Repaying loan principal","Principal repayment is asset ↓ and liability ↓. Interest, tax and electricity are expenses.",["Paying loan interest","Paying income tax","Electricity used"]],
  ["Recording accrued wages at month-end: wages expense is debited. Wages payable is…","credit","A liability increases with a credit."],
  ["Using up one month of prepaid insurance: insurance expense is debited. The prepaid insurance account is…","credit","The prepaid asset decreases, and assets decrease with credits."],
- ["Which bias does the Conceptual Framework call as misleading as aggressive optimism?","bigbath","Unjustified pessimism distorts timing just like optimism.",["informative","prudence","neutrality"]],
- ["Accounting is backward-looking. Which is NOT a reason the course gives for its predictive value?","Auditors guarantee future profits","The reasons: it reveals patterns, accruals embed expectations, and it has confirmatory value.",["It reveals patterns over time","Accruals embed expectations about the future","It confirms or corrects past expectations"]],
  ["Unconsolidated joint ventures and SPEs carry large debts in the footnotes, while the firm reports low leverage. Which assumption is being stretched?","entity","Risks and obligations sit outside the reporting boundary.",["going","monetary","period"]],
  ["A company reports record profits and goes bankrupt the next year. Which is the course’s main explanation?","Profit is not cash: it couldn’t pay its obligations","Profits can be shaped by accounting choices, and weak liquidity can sink a profitable firm.",["The auditors made an arithmetic error","Its revenues were too stable","It paid too little tax"]],
  ["Subscription company: revenue soars, operating cash flow is flat, revenue is recognised earlier and marketing is capitalised. Most likely?","Aggressive accounting, not faster real growth","Recognition and matching choices reshape the trend without changing economic performance.",["Strong genuine growth","Excessive conservatism","A going-concern problem"]]
@@ -702,15 +687,11 @@ medium:[
  ["Expenses decrease equity through…","An asset ↓ or a liability ↑","Cash paid (asset ↓) or a bill received on account (liability ↑).",["An asset ↑ or a liability ↓","A dividend","An asset ↑ only"]],
  ["Retained earnings (cumulative) equal…","Revenues − expenses − dividends","Expanded equation: Assets = Liabilities + Contributed capital + Retained earnings.",["Revenues − expenses + dividends","Assets − liabilities","Cash − dividends"]],
  ["Assets = Liabilities + Contributed capital + …","Retained earnings","The expanded accounting equation.",["Dividends","Revenue","Cash"],["retained earnings","retained profits"]],
- ["“If the equation does not hold, something is wrong.” This is the equation’s role as…","A built-in error check","One of the six reasons the equation matters.",["A valuation tool","A forecast of cash","A disclosure requirement"]],
  ["The income statement explains the change in which balance-sheet item?","Equity (through profit or loss)","BS at t0 → IS explains the change in equity → BS at t1.",["Cash","Total assets","Liabilities"]],
  ["The cash flow statement explains the change in which balance-sheet item?","Cash and cash equivalents","Cash is one asset line; the CFS explains its movement.",["Equity","Retained earnings","Receivables"]],
  ["Balance sheet is a ___; income statement and cash flow statement are ___.","Stock; flows","The BS is a snapshot; the IS and CFS cover a period.",["Flow; stocks","Stock; stocks","Flow; flows"]],
  ["Items expected to be realised or settled within 12 months (or the operating cycle) are…","Current","Everything else is non-current.",["Non-current","Contingent","Deferred"],["current"]],
  ["The current vs non-current split mainly signals…","Liquidity and solvency","Can the firm meet short-term obligations, and is it stable long-term?",["Profitability","Earnings quality","Market value"]],
- ["Accounting “as a service”: the users are the…","Clients","The value of the service depends on whether it meets users’ needs.",["Auditors","Regulators","Managers"],["client"]],
- ["Accounting information systems: identify and capture, record, analyse and interpret, and…","Report to suit users’ needs","The four common features of information systems.",["Audit the results","Tax the profits","Forecast share prices"]],
- ["Which view of accounting shapes the entire course?","dtool","Decision usefulness and stewardship.",["service","language","infosystem"]],
  ["Investors’ checklist: profitability, growth, free cash flow and…","eqq","Do profits reflect genuine performance?",["controls","materiality","assurance"]],
  ["Managers’ checklist uses efficiency indicators such as…","Inventory turnover and receivables collection","Plus cost control and production-capacity signals.",["Interest coverage and leverage","Dividend yield","Share price"]],
  ["Lenders’ checklist: can it repay under normal and stressed conditions? It looks at…","Liquidity, interest coverage and leverage","Lenders care about repayment capacity.",["Brand value and market share","Dividends and share buybacks","Employee satisfaction"]],
@@ -721,9 +702,6 @@ medium:[
  ["Meta’s first-ever decline in daily active users was a warning in which component?","KPIs","Operational and non-GAAP metrics like DAUs, churn and backlog.",["Notes","Auditor’s report","Accounting policies"],["kpi","key performance indicators"]],
  ["Johnson & Johnson’s litigation was disclosed before major settlements. Which component?","Commitments & contingencies","Unrecognised obligations: legal disputes, guarantees, environmental liabilities.",["MD&A","KPIs","Segment information"],["contingencies","commitments and contingencies"]],
  ["Wells Fargo’s cross-selling incentives connect to which component?","Governance information","Board, audit committee, executive pay. Governance weakness often precedes reporting failures.",["Risk factors","KPIs","Notes"],["governance"]],
- ["Emissions scandal exposed control failures in compliance and reporting (2015). Which case?","volkswagen","Volkswagen: internal-control and compliance failure."],
- ["Cash received upfront → liability → revenue over the service period. Which company is the course’s example?","amazon","Amazon Prime."],
- ["Volkswagen mainly illustrates…","controls","Internal control and compliance failure.",["assurance","materiality","going"]],
  ["Tesla’s warranty claims rose, the provision was increased, and profit fell. Which concept?","provision","Warranty provisions rely on forward-looking repair-cost estimates.",["allowance","impairment","depreciation"]],
  ["Apple assumes a longer useful life for its equipment. Effect?","Lower depreciation, higher profit, no cash effect","Useful lives are an assumption that moves profit, not cash.",["Higher depreciation, lower profit","More cash from operations","Higher asset impairment"]],
  ["Netflix capitalises content costs and amortises them over viewing patterns. Which trade-off?","Faithful representation vs comparability","More faithful to its model, less comparable with traditional media.",["Relevance vs timeliness","Materiality vs consistency","Going concern vs period"]],
@@ -731,25 +709,15 @@ medium:[
  ["Peloton’s growth collapsed after gyms reopened. What lesson does the course draw?","Value creation is not one-time","Firms survive only while customers keep seeing value.",["Supplier power destroyed margins","Its accounts were fraudulent","It chose cost leadership"]],
  ["Southwest, Walmart, Amazon and Ryanair show that, besides creating value, a firm needs…","Efficiency in delivering it","Value creation is necessary but not sufficient.",["A luxury brand","Many patents","Low taxes"]],
  ["Uber earns its revenue mainly through…","Commissions on transactions","It owns few vehicles; it coordinates supply and demand.",["Subscriptions","Selling cars","Advertising"]],
- ["“Customers buy benefits, not products.” The course’s example is…","People want a hole, not a drill","Airline ticket = transport, insurance = protection.",["People want coffee, not a café","People want cars, not roads","People want shares, not dividends"]],
- ["According to the course, profit is…","A consequence of creating value for customers","Businesses do not primarily exist to make profit.",["The main reason businesses exist","Equal to cash generated","Guaranteed by past success"]],
- ["Labour, knowledge, machinery, brands and financing are valuable mainly because they are…","Scarce","Resources are valuable because they are scarce.",["Cheap","Recorded at cost","Tax-deductible"],["scarce","scarcity"]],
  ["Rolex vs Casio, Ryanair vs Emirates show that firms…","Serve different markets with different value","Firms choose whom to serve.",["Always compete on price","Have identical cost structures","Cannot coexist"]],
- ["Business strategy + competitive environment = …","Business performance","Performance depends on what happens inside and around the firm.",["Revenue","Equity","Cash flow"],["performance","business performance"]],
  ["Cost leadership typically leaves which financial trace?","Lower margins, higher volumes","Plus strong operational efficiency.",["Higher margins, lower volumes","High R&D spending","Large brand assets"]],
  ["Large development cost, but almost no cost to serve one more customer. This describes a software firm’s…","Cost structure","The pattern of costs needed to run the business model.",["Revenue model","Value proposition","Market"],["cost structure"]],
  ["Who the customers are, what value is offered, how it is delivered and how revenue and profit are earned: this is a…","Business model","It explains how the business sustains itself economically.",["Value chain","Cost structure","Strategy"],["business model"]],
  ["Accounting reports the COST of acquiring resources. What is the real business question?","Do they generate future benefits that justify the sacrifice?","The heart of business decision-making.",["Were they bought at the lowest price?","Are they tax-deductible?","Can they be sold tomorrow?"]],
  ["Profit ≠ cash ≠ growth. A profitable firm can still face…","Cash shortages","Profit, cash and growth are conceptually distinct.",["Negative revenue","Zero assets","No liabilities"]],
  ["Who CAN usually observe the business’s internal activities?","Managers","Outsiders cannot: that is information asymmetry.",["Lenders","Investors","Suppliers"],["management","manager"]],
- ["Three qualities the recording process ensures: traceability, internal consistency and…","comparability","Common conventions across firms under the same framework.",["faithful","timeliness","prudence"]],
- ["Sources of judgment in accruals: estimates, assumptions, judgments. Apple’s useful lives are…","Assumptions","Beliefs about how long assets are used.",["Estimates","Judgments","Errors"]],
- ["Tesla’s warranty provision is which source of judgment?","Estimates","An amount that cannot be known with certainty at the reporting date.",["Assumptions","Judgments","Errors"]],
- ["Amazon Prime’s revenue recognised period by period is which source of judgment?","Judgments","An explicit judgment about performance obligations.",["Estimates","Assumptions","Errors"]],
- ["“Should the event appear?”, “at what amount?”, “how is it organised and explained?” are, in order…","Recognition, measurement, presentation & disclosure","The three layers of what standards do.",["Measurement, recognition, disclosure","Disclosure, recognition, measurement","Recording, posting, balancing"]],
  ["Which is “after the fact”: internal controls or assurance?","assurance","Controls work inside daily operations; the auditor evaluates afterwards.",["controls"]],
  ["An audit gives reasonable assurance. It reduces risk but…","Never eliminates it","Wirecard and Carillion show audit failures.",["Guarantees no fraud","Replaces internal controls","Fixes the numbers"]],
- ["SOX 404 attestations (Microsoft, Walmart) are about…","controls","Management’s internal control over reporting.",["assurance","materiality","going"]]
 ],
 hard:[
  ["Revenue was recognised too early (cash received, obligation not yet met). The TB still balances. What is understated?","Liabilities (deferred revenue)","Revenue is overstated and the contract liability is missing.",["Assets","Expenses","Cash"]],
@@ -757,13 +725,8 @@ hard:[
  ["A cost was capitalised instead of expensed. What is the effect?","Assets and profit overstated","Recorded, but in the wrong account (WorldCom).",["Liabilities overstated","Revenue understated","Cash understated"]],
  ["Revenue was earned but never recorded. What is the effect?","Revenue and receivables understated","Omitted entirely, so the TB still balances.",["Revenue overstated","Liabilities understated","Cash overstated"]],
  ["Adjusting entries are best described as…","Judgments about economic reality","Not new transactions and not bookkeeping error corrections.",["New business transactions","Corrections of posting errors","Cash movements at year-end"]],
- ["The unadjusted trial balance is described in the course as…","Mechanically complete but economically unfinished","It tests structure, not judgment.",["The final basis for the statements","A valuation tool","A performance report"]],
- ["In the six steps, where does accounting “become interpretation”?","The adjusted trial balance","It incorporates timing, allocation and estimation judgments.",["Journal entries","Posting to the ledger","The unadjusted trial balance"]],
  ["Why does accrual revenue for Amazon Prime predict future cash better than the lumpy upfront cash?","It shows the recurring earning power","Revenue is spread as shipping and streaming are delivered.",["It is easier to audit","It increases cash","It avoids taxes"]],
  ["NVIDIA’s hardware + support contracts mainly require judgment about…","The timing of revenue","Identifying performance obligations in multi-element contracts.",["The useful life of chips","The cost principle","Going concern"]],
- ["Assumptions define ___; principles govern ___.","When information is meaningful; how events are recognised, measured and classified","The “analytical spine” of week 5.",["How events are measured; when they are meaningful","What is material; what is consistent","Which standards apply; which auditors sign"]],
- ["In the financial statements, assumptions are usually…","Implicit","Principles, by contrast, directly shape earnings and the balance sheet.",["Listed as a separate statement","Audited separately","Optional"],["implicit"]],
- ["In many scandals (Enron, Carillion, Wirecard), what was the problem?","Unreasonable assumptions treated as truths, or principles bent","Rules were often formally followed.",["The rules were openly ignored","Debits did not equal credits","No auditor was hired"]],
  ["Going-concern doubts: which question should the analyst ask?","Would these values make sense if the firm had to liquidate?","Asset values and profits assume survival.",["Is depreciation straight-line?","Is revenue recognised at delivery?","Is materiality applied?"]],
  ["Current values (fair value, value in use) are more ___ but rely on ___.","Relevant; estimates and models","Historic cost is verifiable but may lag.",["Reliable; invoices","Verifiable; market prices only","Conservative; auditors"]],
  ["A retailer chooses a fiscal year-end right after its holiday peak. Which assumption does the course link this to?","period","The snapshot may not be representative.",["entity","going","monetary"]],
@@ -779,38 +742,29 @@ hard:[
  ["Consistency does NOT require…","Never changing a method","Changes are allowed if justified and explained.",["Comparable periods","Explaining changes","Stable classifications"]],
  ["How should analysts use GAAP earnings when a firm stresses non-GAAP numbers?","As an anchor, checking why adjusted figures depart from it","GAAP is the shared language; adjustments must be justified.",["Ignore GAAP, it is outdated","Average the two","Use whichever is higher"]],
  ["High-quality earnings are…","Persistent, backed by cash, transparent","Low quality: optimistic assumptions, aggressive classifications.",["Smooth and always rising","Higher than peers","Above analyst forecasts"]],
- ["Reported earnings should be treated as…","A hypothesis about performance","Not a conclusion.",["An audited fact","A cash amount","A market value"]],
  ["Accounting standards are best described as…","Constraints within which judgment operates","They set thresholds and boundaries, rarely one numeric answer.",["Recipes with one correct number","Optional guidance","Tax rules"]],
  ["Why can standards not eliminate judgment?","Business activity is complex, continuous and uncertain","Costs precede revenues and benefits span periods.",["Auditors forbid it","Managers refuse rules","IFRS is too short"]],
  ["Where precise measurement is impossible, standards rely on…","Disclosure of assumptions, risks and sensitivities","Numbers alone are not enough.",["Leaving the item out","Using cash amounts only","The auditor’s estimate"]],
  ["What does the Conceptual Framework do when standards are silent?","Provides the logic that guides judgment","It sits upstream of recognition and measurement.",["Gives a default number","Forbids recognition","Sends the case to the regulator"]],
- ["Conceptual Framework → recognition & measurement logic → IFRS standards → accounting choices → …","eqq","Analysts evaluate earnings quality at the end of the flow.",["materiality","assurance","consistency"]],
  ["Enhancing qualitative characteristics can…","Improve usability, not rescue misleading information","Relevance and faithful representation come first.",["Replace relevance","Fix faithful representation","Make any number reliable"]],
  ["Does faithful representation require perfect accuracy?","No: estimates are fine if transparent and consistent","Free from material error, not from all uncertainty.",["Yes, always","Only for cash","Only for revenue"]],
  ["Measurement uncertainty…","Does not invalidate information if disclosed","Estimates are acceptable when transparently derived.",["Always invalidates it","Must be eliminated","Is forbidden under IFRS"]],
  ["Comparability does NOT require…","Identical treatment for different business models","Forcing identical methods can mislead.",["Consistency over time","Similar treatment of similar events","Clear disclosures"]],
  ["Apple’s warranty provision: what would under-provisioning do?","Temporarily inflate performance","Profit now, cash cost later.",["Reduce current profit","Increase cash","Breach the entity assumption"]],
- ["Tesla’s volatile earnings: the analyst separates volatility from business risk from volatility caused by…","Changing estimation assumptions","The second means lower earnings quality.",["Exchange rates only","Tax changes","Auditor rotation"]],
- ["Boeing’s losses on long-term contracts test which characteristic most?","timeliness","Does management recognise losses promptly or delay them?",["comparability","understandability","verifiability"]],
  ["Two firms report different numbers for similar events without breaking IFRS. Why?","Thresholds, estimation techniques or measurement bases differ","An “inconvenient truth” about comparability.",["One must be committing fraud","Auditors made errors","The TB did not balance"]],
  ["Unjustified impairments today lead to…","Artificial rebounds later","Excessive conservatism distorts timing like optimism does.",["Higher cash today","Lower future depreciation only, nothing else","A going-concern problem"]],
  ["Revising accounting estimates can…","Legitimately update information, or quietly manage trends","Revisions need scrutiny.",["Only ever be manipulation","Never affect profit","Only affect cash"]],
  ["“Matching trap”: a manager delays a repair bill to next period. Effect this period?","Profit looks better","Delaying an expense improves period earnings and breaks matching.",["Cash increases","Revenue increases","Liabilities increase"]],
  ["“Revenue mirage”: unordered goods shipped at year-end, knowing they’ll come back in January. Which principle is abused?","revrec","Revenue recognition abuse (channel stuffing).",["matching","materiality","consistency"]],
- ["What does the course call the “truth serum”?","cfs","Cash is harder to fake than profit.",["is","bs"]],
  ["Profits without cash for three years, receivables rising. Which is an innocent possible explanation?","Expansion on credit / working-capital investment","Then check whether cash generation improves later.",["Higher depreciation","Lower tax rate","More dividends"]],
- ["“Where did this number come from?” Which is a REAL decision (not an accounting choice) that shapes revenue?","Pushing or postponing shipments","Real decisions change activity; accounting choices change how it is reported.",["Changing the returns estimate","Changing % of completion","Reclassifying an item"]],
  ["Why are late journal entries with vague descriptions dangerous?","They hide whether an item is an asset or an expense, revenue or a liability","The journal fixes timing and classification for everything downstream.",["They break the TB","They are illegal","They change cash"]],
  ["Contract liability roll-forward:","Opening + additions − releases = closing","Check that movements match billings and delivery.",["Opening − additions + releases = closing","Revenue − cash = closing","Cash + revenue = closing"]],
- ["Recognition is not neutral because…","It decides what is visible and what stays off the balance sheet","Brand, talent and relationships often stay invisible.",["It is done by auditors","It ignores cash","It is always conservative"]],
- ["“Measurement is not just arithmetic; it is…”","A narrative choice","Methods and estimates shape the reported story.",["A legal obligation","A cash amount","An auditor’s duty"]],
  ["Intermarché: if an insurance recovery is probable and supported by evidence, which account appears?","Insurance receivable","An asset for the expected recovery.",["Unearned revenue","Warranty provision","Owner’s capital"],["insurance receivable"]],
  ["Intermarché: where would you see the damaged fridges?","As PP&E impairment (BS and IS)","Damaged equipment is tested for impairment.",["As revenue","As a financing outflow","As unearned revenue"]],
  ["Intermarché Case C (“big bath”) mainly violates…","neutrality","Unjustified pessimism is not neutral.",["materiality","consistency","period"]],
  ["Intermarché Case A violates neutrality and…","prudence","It overstates assets and profit under uncertainty.",["materiality","comparability","timeliness"]],
  ["Prudence is NOT…","Pessimism","It is caution under uncertainty.",["Caution","Avoiding overstatement","Evidence-based"],["pessimism"]],
  ["€50m spent on brand and loyalty; no asset appears. Which risk for analysts?","Misleading comparisons between firms that buy vs build intangibles","Also: understated value and distorted profitability patterns.",["Overstated assets","Double-counted revenue","Breached going concern"]],
- ["Relevance without reliability ___; reliability without relevance is ___.","Misleads; useless","Usefulness requires both.",["Is useless; misleading","Is fine; fine","Is fraud; illegal"]],
  ["“Profitable but dying”: near insolvency, long-term liabilities may…","Need immediate settlement","Covenant breaches can overturn the classification.",["Disappear","Turn into equity","Become revenue"]],
  ["Lower bad-debt allowance or warranty provision in a weak economy is a red flag for…","Estimate manipulation: profit now, risk later","Check consistency with business conditions and peers.",["Excessive conservatism","Going-concern failure","Consistency breach"]],
  ["Large provisions or impairments with little evidence most likely signal…","bigbath","Later reversals create artificial rebounds.",["informative","aggressive"]],
@@ -1299,22 +1253,22 @@ var EXAMS=[
 ]
 ],
 [
-"Which course case does this most resemble?",
+"Harbor’s managers receive a bonus based on return on assets. What does this add to the analysis?",
 [
-"Enron: a separate entity structured to meet the technical non-consolidation rules while the parent keeps the economic exposure and risk.",
-"Same mechanism: SPEs, guarantees, debt off the balance sheet."
+"A motive to keep FleetCo outside: leaving out its trucks and debt lifts ROA and lowers leverage, so the structure needs extra scepticism.",
+"It links the incentive to the specific choice and its effect."
 ],
 [
-"The airlines in the course, whose large lease obligations were visible only in the notes while their balance sheets showed relatively little debt.",
-"Similar effect, but no separate entity was built for it."
+"Bonus schemes based on accounting ratios can encourage managers to prefer favourable accounting policies in general.",
+"True in general, but it does not connect the incentive to the FleetCo decision."
 ],
 [
-"Carillion, which kept reporting healthy-looking figures while its debt kept rising and its financial position quietly deteriorated.",
-"Some similarity, but Carillion is the going-concern case."
+"ROA would fall if FleetCo were consolidated, because its trucks would be added to Harbor’s total assets.",
+"True, but it is the mechanism, not what the bonus adds to the analysis."
 ],
 [
-"Meta, whose most valuable resources are missing from the balance sheet because they were generated internally rather than bought.",
-"That is about invisible intangibles, not hidden debt."
+"Nothing, because a bonus scheme is a governance matter and has no link to how the accounts are prepared.",
+"Incentives are exactly what drives judgments at the entity boundary."
 ]
 ]
 ]
@@ -1430,22 +1384,22 @@ var EXAMS=[
 ]
 ],
 [
-"Which course case is closest?",
+"Furnaces like Ferrocast’s are in practice replaced every 8–9 years across the industry. What follows?",
 [
-"Waste Management: extended depreciation lives (and capitalised costs) pushed expenses into future periods.",
-"Same lever: useful lives."
+"The 15-year life lacks support: depreciation is understated each year, and early scrapping will bring a big loss.",
+"It judges the assumption against evidence and follows the consequence through time."
 ],
 [
-"WorldCom, which moved routine costs from the income statement to the balance sheet and overstated its profit by billions.",
-"Similar effect, but WorldCom capitalised operating costs rather than changing lives."
+"Depreciation is lower than it should be, so reported profit is higher than it should be in each of these years.",
+"True, but it misses what happens when the furnaces are retired early."
 ],
 [
-"Toshiba, where management manipulated accounting estimates for years under strong internal pressure to report better profits.",
-"Similar spirit, but its tool was percentage-of-completion."
+"Ferrocast becomes less comparable with peers that depreciate the same kind of asset over 8 years.",
+"True, but a consequence rather than the main conclusion."
 ],
 [
-"Enron, which used separate special-purpose entities to keep its debt and losses off the balance sheet.",
-"Not related to depreciation."
+"Nothing changes, because useful lives are management’s choice and any number is acceptable under the standards.",
+"Estimates must be reasonable and supported by evidence."
 ]
 ]
 ]
@@ -1619,22 +1573,22 @@ var EXAMS=[
 ]
 ],
 [
-"Which course case does this most resemble?",
+"Coastline’s managers earn a bonus on annual profit, and a bank covenant requires profit above €12m. How does this change your view?",
 [
-"Toshiba, which overstated its profits for years by manipulating percentage-of-completion estimates.",
-"Same estimate, same mechanism."
+"A clear motive for 75%: €15m clears the covenant, the engineer’s €10m would breach it, so be very sceptical.",
+"It connects both incentives to the numbers in the case."
 ],
 [
-"WorldCom, whose profits were overstated by billions through accounting choices that its auditors did not catch in time.",
-"Profit was overstated, but by capitalising costs, not by completion estimates."
+"Bonuses and covenants are common reasons for managers to make aggressive estimates.",
+"True in general, but it does not apply it to this case."
 ],
 [
-"Wirecard, which recorded amounts in its accounts that independent parties could never verify.",
-"Partly similar, but Wirecard’s cash was fictitious."
+"At 50% completion profit would be €10m, which is below the €12m required by the covenant.",
+"True, but it stops before drawing the conclusion."
 ],
 [
-"Meta, whose market value reflects resources that the balance sheet simply cannot capture.",
-"Unrelated."
+"It changes nothing, because estimates are checked by the auditor and covenants are a private matter with the bank.",
+"Audit gives reasonable assurance only, and incentives are central to judging estimates."
 ]
 ]
 ]
@@ -1731,22 +1685,22 @@ var EXAMS=[
 ]
 ],
 [
-"Which course case does this most resemble?",
+"If Quarry & Sons had to stop operating, what would most likely happen to its €500m of quarries and plant?",
 [
-"Carillion: profits and asset values while cash flows were weak, debt rising and covenants tight.",
-"Same pattern."
+"Only what a forced sale raises, likely far below €500m, since the carrying amount assumes years of use.",
+"It shows what the going-concern assumption is holding up."
 ],
 [
-"Wirecard, where serious concerns were raised in the auditor’s work shortly before the company collapsed.",
-"Partly similar, but Wirecard was about fictitious cash."
+"They would need to be tested for impairment, because their recoverable amount would fall.",
+"True, but it does not explain why the value would fall."
 ],
 [
-"Enron, which collapsed despite reporting profits and a healthy-looking financial position right up to the end.",
-"Partly similar, but Enron hid debt off the balance sheet."
+"The €300m bond might have to be repaid immediately out of whatever the sale of the assets raised.",
+"True, but about the debt, not the assets."
 ],
 [
-"Netflix, which capitalises content costs and amortises them over expected viewing patterns.",
-"Unrelated."
+"Nothing, because assets are always kept at historical cost less depreciation, whatever happens to the business.",
+"Without going concern, measurement based on continued use no longer makes sense."
 ]
 ],
 [
@@ -1813,22 +1767,22 @@ var EXAMS=[
 ]
 ],
 [
-"Which course case does this most resemble?",
+"Which figure should an investor anchor on when judging UrbanFit?",
 [
-"WeWork, whose adjusted earnings suggested improvement while its GAAP losses and cash burn widened.",
-"Same pattern."
+"The IFRS net loss and the cash burn, using adjusted EBITDA only after checking what was excluded and why.",
+"GAAP as the anchor, with adjustments examined critically."
 ],
 [
-"Waste Management, which made its earnings look smooth and predictable until later corrections collapsed its profits.",
-"Partly similar, but through depreciation and capitalisation."
+"Cash burn, because cash is much harder to manipulate than any of the profit measures.",
+"Useful, but it ignores the accrual information in IFRS profit."
 ],
 [
-"Toshiba, where reported performance was shaped for years by internal pressure to show better results.",
-"Partly similar, but through estimates."
+"Adjusted EBITDA reconciled line by line to IFRS, so that each exclusion can be seen and judged.",
+"Good practice, but it still starts from management’s measure."
 ],
 [
-"Enron, which used separate entities to hide large amounts of debt off its balance sheet.",
-"Unrelated."
+"Adjusted EBITDA, because management knows the business best and calls it the best measure of performance.",
+"Management has an incentive to present the most favourable measure."
 ]
 ]
 ]
@@ -2051,22 +2005,22 @@ var EXAMS=[
 ]
 ],
 [
-"Which course example is closest?",
+"Medisupply’s collection period went from 45 to 80 days. What does that imply for the allowance?",
 [
-"The course’s bad-debt scenario in a weak economy (profit up now, write-offs later), the same lever as NVIDIA’s allowance.",
-"Exact match with the scenario and the example."
+"Slower collection usually means a higher risk of non-payment, so the allowance should be rising, not falling from 6% to 2%.",
+"It connects the evidence to the direction of the estimate."
 ],
 [
-"NVIDIA, where a lower estimate for the allowance for doubtful accounts means higher reported earnings for the period.",
-"True, but it misses the weak-economy context."
+"More receivables are overdue, so the ageing schedule will show a bigger overdue balance at year-end.",
+"True, but it does not say what it means for the allowance."
 ],
 [
-"Tesla, where lowering an estimate (the warranty provision) inflates current profit and pushes costs into later periods.",
-"Similar logic, but warranties, not receivables."
+"Cash is tied up in receivables for longer, so operating cash flow weakens during the year.",
+"True, but about cash, not the estimate."
 ],
 [
-"Enron, which used off-balance-sheet entities to hide obligations from investors and lenders.",
-"Unrelated."
+"Nothing, because the collection period affects cash flow, not the estimate of bad debts.",
+"Slower payment is one of the main signals of credit risk."
 ]
 ],
 [
@@ -2565,22 +2519,22 @@ var EXAMS=[
 ]
 ],
 [
-"The maintenance reclassification most resembles…",
+"What is the effect of moving €15m from maintenance expense to equipment?",
 [
-"WorldCom: routine expenses capitalised as assets, overstating profit and assets.",
-"Exact mechanism."
+"Profit and assets up €15m now, the cost returns later as depreciation, and total cash is unchanged.",
+"Income statement, balance sheet, timing and cash."
 ],
 [
-"Waste Management, which also capitalised costs that should have been expensed in the period.",
-"Also true of Waste Management, but its main lever was useful lives."
+"Profit is overstated by €15m in the current year.",
+"True, but incomplete."
 ],
 [
-"A breach of the matching principle, since current costs are pushed into future periods.",
-"True, but not a case."
+"Equipment on the balance sheet is overstated by €15m.",
+"True, but incomplete."
 ],
 [
-"Enron, which used separate entities to keep debt off its balance sheet.",
-"Enron is about off-balance-sheet entities."
+"Operating cash flow falls by €15m, because equipment purchases are classified as investing outflows.",
+"Moving a payment from operating to investing would make operating cash flow rise, not fall."
 ]
 ],
 [
