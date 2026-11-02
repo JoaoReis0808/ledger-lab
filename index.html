@@ -10,7 +10,7 @@
 :root{
   --bg:#edf3ee; --surface:#fbfdfb; --ink:#14231b; --muted:#56685d; --line:#cddbd1;
   --green:#1d6b47; --green-soft:#dcebe0; --red:#b3392d; --red-soft:#f6e1dd;
-  --good:#1f8a4c; --good-soft:#d9f0e1; --hl:#f3d36b; --hl-ink:#2a2100;
+  --good:#1f8a4c; --good-soft:#d9f0e1; --amber:#b07400; --amber-soft:#fbefd2; --hl:#f3d36b; --hl-ink:#2a2100;
   --f-display:"Bitter",Georgia,serif;
   --f-body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -18,11 +18,11 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0f1813; --surface:#16221b; --ink:#e3ece5; --muted:#93a69a; --line:#273a2e;
   --green:#71c79c; --green-soft:#1c3326; --red:#ff8072; --red-soft:#3d1d19;
-  --good:#6fd394; --good-soft:#153522; --hl:#e9c45a; --hl-ink:#231a00; color-scheme:dark}}
+  --good:#6fd394; --good-soft:#153522; --amber:#f0b34a; --amber-soft:#3a2c10; --hl:#e9c45a; --hl-ink:#231a00; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f1813; --surface:#16221b; --ink:#e3ece5; --muted:#93a69a; --line:#273a2e;
   --green:#71c79c; --green-soft:#1c3326; --red:#ff8072; --red-soft:#3d1d19;
-  --good:#6fd394; --good-soft:#153522; --hl:#e9c45a; --hl-ink:#231a00; color-scheme:dark}
+  --good:#6fd394; --good-soft:#153522; --amber:#f0b34a; --amber-soft:#3a2c10; --hl:#e9c45a; --hl-ink:#231a00; color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16.5px;line-height:1.5;margin:0}
@@ -101,6 +101,15 @@ button{font:inherit;color:inherit;cursor:pointer}
 .opt.right{border-color:var(--good);background:var(--good-soft)}
 .opt.wrong{border-color:var(--red);background:var(--red-soft)}
 .opt.dim{opacity:.5}
+.opt.part{border-color:var(--amber);background:var(--amber-soft)}
+.opt.chosen{box-shadow:0 0 0 3px var(--ink)}
+.opt .why{display:block;font-size:.85rem;color:var(--muted);margin-top:6px;font-weight:400}
+.opt .why b{color:var(--ink)}
+.case{background:var(--green-soft);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;max-width:72ch}
+.case b{font-family:var(--f-display);font-size:1.05rem;color:var(--green)}
+.case p{font-size:.98rem;line-height:1.6}
+.fb.mid{border-left-color:var(--amber);background:var(--amber-soft)}
+.fb.mid strong{color:var(--amber)}
 
 .write{display:flex;gap:10px;flex-wrap:wrap}
 .write input{flex:1 1 240px;min-width:0;font:inherit;font-size:1.08rem;padding:12px 14px;border:2px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
@@ -147,6 +156,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <button class="card" data-go="defs"><span class="n">01</span><b>Definitions</b><small>What each concept is and why it matters. Read the cards, then take the quiz.</small></button>
     <button class="card" data-go="memo"><span class="n">02</span><b>Memorise the lists</b><small>Fill in all 50 names from memory (elements, assumptions, principles, forces…), or spot the missing one.</small></button>
     <button class="card" data-go="setup"><span class="n">03</span><b>Name that concept</b><small>Scenarios, T-account logic, red flags and cases. Easy, medium or hard, multiple choice or typed answer.</small></button>
+    <button class="card" data-go="exams"><span class="n">04</span><b>Mock midterms</b><small>Six exams of company cases. Read the paragraph, then pick the BEST of four answers: three are partly right, only one is the most complete.</small></button>
   </div>
 </section>
 
@@ -191,6 +201,15 @@ button{font:inherit;color:inherit;cursor:pointer}
     <p class="lead">Round of 10. Each question shows one list from the course with one name covered.</p>
     <button class="btn" style="align-self:flex-start" id="faltaGo">Start</button>
   </div>
+</section>
+
+<!-- EXAMS -->
+<section id="exams" class="panel" hidden>
+  <button class="back" data-go="home">← Menu</button>
+  <h2>Mock midterms</h2>
+  <p class="lead">Each midterm has four company cases with three questions each. Every question has one best answer, two that are partly right, and one that is wrong. Only the best answer scores. After each answer you see why every option scores the way it does.</p>
+  <div class="chips" id="examList"></div>
+  <button class="ghost" style="align-self:flex-start" id="examMix">Mixed: 12 random questions from all six</button>
 </section>
 
 <!-- SETUP -->
@@ -976,10 +995,10 @@ var LEVELS=[["easy","Easy","Definitions applied, basic entries, the equation"],[
 var MODES=[["mc","Multiple choice","Boxes, pick one (keys 1–4)"],["write","Typed answer","Type the name of the concept"]];
 
 /* ---------- screens ---------- */
-var SCREENS=["home","defs","memo","setup","quiz","end"];
+var SCREENS=["home","defs","memo","setup","exams","quiz","end"];
 function show(id){SCREENS.forEach(function(x){$(x).hidden=x!==id});if(id!=="memo")stopTimer();window.scrollTo(0,0)}
 document.querySelectorAll("[data-go]").forEach(function(b){b.addEventListener("click",function(){go(b.dataset.go)})});
-function go(id){show(id);if(id==="memo")memoView(memoMode);if(id==="setup")renderSetup()}
+function go(id){show(id);if(id==="memo")memoView(memoMode);if(id==="setup")renderSetup();if(id==="exams")renderExams()}
 
 var level=store("ledger-level")||"easy",mode=store("ledger-mode")||"mc";
 function chipRow(box,list,val,set){
@@ -1011,8 +1030,9 @@ function guessItems(lv,m){
 /* ---------- quiz engine ---------- */
 var ROUND=10,S=null;
 function startQuiz(ctx,m){
-  var pool=ctx==="defs"?defsItems():ctx==="falta"?faltaItems():guessItems(ctx,m);
-  S={ctx:ctx,mode:m,items:shuffle(pool).slice(0,ROUND),i:0,score:0,streak:0,right:0,missed:[],locked:false};
+  var ex=ctx.indexOf("exam")===0;
+  var pool=ex?examItems(ctx):ctx==="defs"?defsItems():ctx==="falta"?faltaItems():guessItems(ctx,m);
+  S={ctx:ctx,mode:m,items:ex?(ctx==="exam-mix"?shuffle(pool).slice(0,12):pool):shuffle(pool).slice(0,ROUND),i:0,score:0,streak:0,right:0,missed:[],locked:false};
   show("quiz");renderQ();
 }
 function renderHud(){$("hQ").textContent=(S.i+1)+"/"+S.items.length;$("hS").textContent=S.score;$("hK").textContent=S.streak;$("hBar").style.width=(100*S.i/S.items.length)+"%"}
@@ -1041,6 +1061,17 @@ function choose(id){
     b.disabled=true;
     if(b.dataset.id===it.answer)b.classList.add("right");else if(b.dataset.id===id)b.classList.add("wrong");else b.classList.add("dim");
   });
+  if(it.kind==="exam"){
+    var lab={best:"Best answer",part:"Partly right",wrong:"Wrong"},pick=null;
+    document.querySelectorAll("#opts .opt").forEach(function(b){
+      var o=it.options.filter(function(x){return x.id===b.dataset.id})[0];
+      b.classList.remove("dim","wrong","right");b.classList.add(o.s==="best"?"right":o.s==="part"?"part":"wrong");
+      if(o.id===id){b.classList.add("chosen");pick=o}
+      var w=document.createElement("span");w.className="why";w.innerHTML="<b>"+lab[o.s]+".</b> ";w.appendChild(document.createTextNode(o.why));
+      b.querySelector(".t").appendChild(w);
+    });
+    return result(pick.s==="best",pick.s==="part"?"Partly right, but not the best answer: no points.":"",pick.s==="part");
+  }
   result(id===it.answer,"");
 }
 $("wForm").addEventListener("submit",function(e){
@@ -1050,26 +1081,26 @@ $("wForm").addEventListener("submit",function(e){
   inp.disabled=true;var it=S.items[S.i];
   result(it.num?raw.replace(/[^0-9]/g,"")===it.num:it.accept.indexOf(norm(raw))>=0,"You wrote: “"+raw+"”.");
 });
-function result(ok,note){
+function result(ok,note,mid){
   S.locked=true;var it=S.items[S.i],fb=$("fb");
-  fb.className="fb "+(ok?"good":"bad");
+  fb.className="fb "+(ok?"good":mid?"mid":"bad");
   if(ok){var pts=100+S.streak*20;S.score+=pts;S.streak++;S.right++;$("fbT").textContent="Correct! +"+pts}
-  else{S.streak=0;S.missed.push(it);$("fbT").textContent="Not quite"}
+  else{S.streak=0;S.missed.push(it);$("fbT").textContent=mid?"Close":"Not quite"}
   $("fbN").hidden=ok||!note;$("fbN").textContent=note;
-  $("fbA").hidden=ok;$("fbA").innerHTML=ok?"":"Answer: <b>"+esc(it.answerText)+"</b>";
-  $("fbE").textContent=it.expl;
+  $("fbA").hidden=ok||it.kind==="exam";$("fbA").innerHTML=ok?"":"Answer: <b>"+esc(it.answerText)+"</b>";
+  $("fbE").textContent=it.kind==="exam"?"":it.expl;$("fbE").hidden=it.kind==="exam";
   $("nextBtn").textContent=S.i>=S.items.length-1?"See results":"Next";
   fb.hidden=false;renderHud();
   setTimeout(function(){$("nextBtn").focus({preventScroll:true});fb.scrollIntoView({block:"nearest",behavior:"smooth"})},40);
 }
 function advance(){if(!S||!S.locked)return;if(S.i>=S.items.length-1)return finish();S.i++;renderQ();$("quiz").scrollIntoView({block:"start"})}
 $("nextBtn").onclick=advance;
-$("quit").onclick=function(){go(S&&S.ctx==="defs"?"defs":S&&S.ctx==="falta"?"memo":"setup")};
+$("quit").onclick=function(){go(S&&S.ctx==="defs"?"defs":S&&S.ctx==="falta"?"memo":S&&S.ctx.indexOf("exam")===0?"exams":"setup")};
 function finish(){
   show("end");
   var key="ledger-best-"+S.ctx+"-"+S.mode,prev=parseInt(store(key)||"0",10),rec=S.score>prev;
   if(rec)store(key,String(S.score));
-  var title={defs:"Definitions quiz",falta:"Which one is missing?"}[S.ctx]||("Name that concept · "+LEVELS.filter(function(l){return l[0]===S.ctx})[0][1]);
+  var title=S.ctx==="exam-mix"?"Mixed midterm":S.ctx.indexOf("exam-")===0?EXAMS[+S.ctx.slice(5)].t:{defs:"Definitions quiz",falta:"Which one is missing?"}[S.ctx]||("Name that concept · "+LEVELS.filter(function(l){return l[0]===S.ctx})[0][1]);
   var pct=S.right/S.items.length;
   $("endTitle").textContent=title+(pct===1?": perfect!":pct>=.7?": well done":pct>=.5?": nearly there":": review time");
   $("endScore").textContent=S.score;
@@ -1093,6 +1124,1579 @@ document.addEventListener("keydown",function(e){
   if(!S.locked&&S.mode==="mc"&&/^[1-4]$/.test(e.key)){var o=S.items[S.i].options[+e.key-1];if(o){e.preventDefault();choose(o.id)}}
   else if(S.locked&&e.key==="Enter"&&document.activeElement!==$("nextBtn")){e.preventDefault();advance()}
 });
+
+/* ---------- 4. mock midterms: each question = [question, [best, why], [partly right, why], [partly right, why], [wrong, why]] ---------- */
+var EXAMS=[
+{
+"t": "Midterm 1",
+"cases": [
+{
+"n": "StreamNest",
+"p": "StreamNest sells annual subscriptions to its video-learning platform. In December 2026 it ran a year-end campaign and billed €36m of 12-month subscriptions starting 1 December, all paid upfront. The income statement for the year to 31 December shows revenue of €52m, up 70%, and the CEO highlights “record performance”. Operating cash flow is €40m. The balance sheet shows no contract liabilities. The accounting-policy note says revenue is recognised “when the customer is invoiced”.",
+"qs": [
+[
+"What is the most accurate assessment of StreamNest’s revenue?",
+[
+"Revenue is overstated: only €3m of the €36m was earned in December, so €33m should be a contract liability and the “record” is mostly timing.",
+"It names the problem, quantifies it (€36m ÷ 12 = €3m earned) and draws the conclusion about the headline."
+],
+[
+"The policy of recognising revenue when the customer is invoiced does not match the principle that revenue is recognised when performance obligations are satisfied, so the policy note itself is a warning sign.",
+"True, but it stops at the policy and does not say what it does to the numbers."
+],
+[
+"Operating cash flow of €40m is strong and hard to fake, so whatever the timing of revenue, the cash collected from the December campaign is real and supports the business.",
+"True, but it does not assess the revenue figure, which is what was asked."
+],
+[
+"Revenue is correct, because the €36m was received in cash in December, is non-refundable, and the customers have already committed to the full year of service.",
+"Revenue follows performance, not cash. Eleven months of service are still owed."
+]
+],
+[
+"If StreamNest corrected its accounting, what would happen to the year-end statements?",
+[
+"Revenue and profit fall by €33m, a €33m contract liability appears on the balance sheet, and operating cash flow stays exactly at €40m.",
+"All three statements: IS down, BS liability up, CFS unchanged."
+],
+[
+"Revenue falls by €33m, and because lower revenue means lower profit, retained earnings and total equity at year-end also fall by the same €33m.",
+"True, but it misses the liability that appears and the unchanged cash."
+],
+[
+"A contract liability of €33m appears on the balance sheet, representing the eleven months of service that StreamNest still owes to its new subscribers.",
+"True, but it misses the effect on revenue, profit and cash."
+],
+[
+"Operating cash flow falls by €33m, because the cash relating to next year’s months of service must be moved out of this year’s cash flow statement.",
+"The cash was received in 2026. Correcting revenue timing does not move cash."
+]
+],
+[
+"Which check would best reveal the problem to an analyst?",
+[
+"Compare billing with delivery: large upfront cash for a 12-month service should create a contract liability released monthly. Its absence is the missing second side.",
+"The T-account “lie detector”: if cash went up here, where is the obligation?"
+],
+[
+"Read the revenue-recognition policy in the notes, because it states exactly when StreamNest recognises revenue and can be compared with the principle of satisfying performance obligations.",
+"Useful, and it hints at the problem, but alone it does not show the size of it."
+],
+[
+"Compare StreamNest’s 70% revenue growth with the growth of its peers, since growth far above the industry is often a sign that something unusual is going on in the numbers.",
+"Helpful context, but peers growing slower does not prove the accounting is wrong."
+],
+[
+"Check that the trial balance balances: if total debits equal total credits, then both the revenue figure and the absence of a contract liability are confirmed.",
+"A balanced TB proves only that debits equal credits. This error balances perfectly."
+]
+]
+]
+},
+{
+"n": "Voltara Motors",
+"p": "Voltara Motors, an electric-car maker, has always recognised a warranty provision of 3% of sales. In 2026 warranty claims per car rose by 20% after a battery defect was reported in the press. Management nevertheless cut the provision rate to 1.5%, explaining that “new production processes will reduce failures”. The change added €18m to operating profit, which beat analysts’ forecasts by €10m. The note on estimates gives no data on claim rates.",
+"qs": [
+[
+"How should an analyst interpret the change?",
+[
+"A biased estimate: cutting it while claims rise lifts profit, not cash, so 2026 earnings quality is low and repairs will hit later profit.",
+"It links the estimate, the evidence, the incentive and the consequence."
+],
+[
+"A warranty provision is a judgment-heavy estimate based on expected repair costs, so some change from year to year is normal and should not be treated as suspicious on its own.",
+"True in general, but here the change goes against the evidence."
+],
+[
+"The €18m boost from the lower rate is larger than the €10m by which Voltara beat forecasts, so without the change it would actually have missed analysts’ expectations.",
+"Numerically true, but it describes the effect rather than interpreting it."
+],
+[
+"The lower provision increases operating cash flow by €18m this year, because less money has to be set aside in the bank for future repairs.",
+"A provision is not a cash flow. Cash leaves later, when repairs are paid."
+]
+],
+[
+"Which qualitative characteristic is most at risk?",
+[
+"Neutrality, which is part of faithful representation: the new estimate looks tailored to reach a profit target rather than based on evidence.",
+"The core problem is bias in the estimate."
+],
+[
+"Comparability: cutting the rate from 3% to 1.5% makes 2026 hard to compare with 2025 and with competitors that kept their warranty estimates stable over the same period.",
+"True, but a secondary consequence."
+],
+[
+"Verifiability: without any data on claim rates, independent observers cannot check how the new 1.5% rate was derived or whether it is a reasonable estimate.",
+"True, but the deeper problem is that the number is not neutral."
+],
+[
+"Timeliness: the warranty cost should only be recorded when the cars are actually repaired, so recognising it at the time of sale was the original mistake.",
+"Waiting for repairs would make reporting late. Provisions exist to recognise probable costs early."
+]
+],
+[
+"What should Voltara have done to report faithfully?",
+[
+"Base the provision rate on the observed claims, which point up rather than down, and disclose the assumptions and the sensitivity of the estimate.",
+"An evidence-based number plus transparent disclosure."
+],
+[
+"Keep the provision at 3% of sales for consistency with previous years, since changing an estimate without strong evidence weakens comparability between periods.",
+"Better than 1.5%, but the evidence (claims up 20%) suggests the rate should rise."
+],
+[
+"Disclose the change in estimate and its €18m effect on operating profit clearly in the notes, so that users can see how much of the result the change explains.",
+"Necessary, but disclosure does not fix a biased number."
+],
+[
+"Stop recognising a warranty provision and simply expense repairs when they are paid, since the amounts are uncertain and estimates are too easy to manipulate.",
+"That breaks matching and delays costs. Uncertainty is handled by estimating, not by ignoring."
+]
+]
+]
+},
+{
+"n": "Harbor Logistics",
+"p": "Harbor Logistics reports a debt-to-equity ratio of 0.4, well below its peers’ 1.5, and a return on assets of 12%. In the notes, an analyst finds that Harbor set up FleetCo, a separate company that owns most of the trucks Harbor uses. FleetCo borrowed €400m from banks, and Harbor has guaranteed that debt. FleetCo is not consolidated because Harbor holds only 45% of its shares, although Harbor’s managers make FleetCo’s operating decisions and Harbor uses its entire fleet.",
+"qs": [
+[
+"Which concept is most at stake?",
+[
+"The economic-entity boundary: FleetCo’s debt and trucks economically belong to Harbor, so leaving them out makes Harbor look less leveraged than it is.",
+"Who is inside the boundary decides what leverage the statements show."
+],
+[
+"Disclosure: the existence of FleetCo, its €400m of bank debt and Harbor’s guarantee are all reported in the notes, so a careful reader can still find the exposure.",
+"True, and it is how the analyst found it, but it is not the main concept."
+],
+[
+"Going concern: if FleetCo cannot repay its banks, Harbor would have to honour its €400m guarantee, which could put Harbor’s own survival at risk.",
+"A possible risk, but secondary to the boundary question."
+],
+[
+"Monetary measurement: the trucks and the guarantee cannot be reliably measured in money, so they correctly stay out of Harbor’s financial statements.",
+"Trucks are easy to measure. The issue is whose balance sheet they are on."
+]
+],
+[
+"How would including FleetCo change Harbor’s ratios?",
+[
+"Debt-to-equity rises sharply (about €400m more debt) and return on assets falls because total assets rise, bringing Harbor close to its peers.",
+"Both ratios move, and the comparison with peers changes."
+],
+[
+"Debt-to-equity would rise well above 0.4, because the €400m of FleetCo’s bank debt would be added to Harbor’s own borrowings on the consolidated balance sheet.",
+"True, but incomplete."
+],
+[
+"Total assets would rise substantially, because the trucks owned by FleetCo would appear on Harbor’s consolidated balance sheet alongside its other assets.",
+"True, but it misses the debt, which is the bigger story."
+],
+[
+"Profit would rise, because FleetCo’s rental income from Harbor would be added to Harbor’s revenue without any extra costs being added.",
+"Consolidation adds costs as well, and intra-group transactions are eliminated."
+]
+],
+[
+"Which course case does this most resemble?",
+[
+"Enron: a separate entity structured to meet the technical non-consolidation rules while the parent keeps the economic exposure and risk.",
+"Same mechanism: SPEs, guarantees, debt off the balance sheet."
+],
+[
+"The airlines in the course, whose large lease obligations were visible only in the notes while their balance sheets showed relatively little debt.",
+"Similar effect, but no separate entity was built for it."
+],
+[
+"Carillion, which kept reporting healthy-looking figures while its debt kept rising and its financial position quietly deteriorated.",
+"Some similarity, but Carillion is the going-concern case."
+],
+[
+"Meta, whose most valuable resources are missing from the balance sheet because they were generated internally rather than bought.",
+"That is about invisible intangibles, not hidden debt."
+]
+]
+]
+},
+{
+"n": "Alpenrose Distribution",
+"p": "Alpenrose, a wholesale distributor of home appliances, reports sales up 8% and net income up 22%. Trade receivables rose 45% and the average collection period went from 40 to 65 days. In the last two weeks of December, sales were three times the usual level, after Alpenrose offered retailers 120-day payment terms and the right to return unsold units until March. Operating cash flow fell from €30m to €9m.",
+"qs": [
+[
+"What is the most important red flag?",
+[
+"Profit up while operating cash collapses, because receivables outgrow sales: revenue may be booked before it is earned or collectible.",
+"It joins the symptoms into the core earnings-quality problem."
+],
+[
+"Receivables growing much faster than revenue (45% against 8%), with the average collection period stretching from 40 to 65 days.",
+"True, and part of the story, but on its own it misses the profit–cash gap."
+],
+[
+"A sharp sales surge in the last two weeks of December, with sales at three times their usual level just before the year-end.",
+"True, but it is one symptom, not the overall flag."
+],
+[
+"Heavy reliance on short-term debt, since a distributor with collapsing operating cash flow will soon need to refinance its borrowings.",
+"Nothing in the case is about debt."
+]
+],
+[
+"Which explanation is most consistent with all the facts?",
+[
+"Channel stuffing / aggressive cut-off: goods pushed to retailers at year-end with long terms and return rights, so part of the sales may come back in Q1.",
+"It explains the surge, the terms, the return rights and the cash gap together."
+],
+[
+"Alpenrose loosened its credit terms to win market share from its competitors, which naturally slows collections and raises receivables relative to sales.",
+"Plausible, but it ignores the year-end timing and the return rights."
+],
+[
+"Its retail customers are under financial pressure and are paying more slowly, which raises receivables and lowers the cash collected during the year.",
+"Possible, but it does not explain the December surge."
+],
+[
+"Higher depreciation on new warehouses reduced operating cash flow, while profit was helped by higher sales volumes during the year.",
+"Depreciation is not a cash flow, so it cannot lower operating cash flow."
+]
+],
+[
+"What should the analyst check next?",
+[
+"Q1 returns and credit notes, the allowance for doubtful accounts, the return-rights policy, and cash collected after year-end.",
+"These directly test whether the December revenue was real."
+],
+[
+"The ageing schedule of receivables in the notes, to see how much of the balance is overdue, by how long, and which customers are involved.",
+"Helpful, but it does not capture the returns risk."
+],
+[
+"Whether the auditor issued a clean opinion, since auditors test revenue recognition and cut-off and would flag a material misstatement.",
+"Useful, but audit gives reasonable assurance, not proof of quality earnings."
+],
+[
+"Whether total debits equal total credits in the trial balance, which would confirm that December’s sales were recorded correctly.",
+"This tells you nothing about revenue timing."
+]
+]
+]
+}
+]
+},
+{
+"t": "Midterm 2",
+"cases": [
+{
+"n": "Ferrocast",
+"p": "Ferrocast, a steel-components maker, invested €200m in new furnaces in 2025–2026, raising gross property, plant and equipment by 40%. Depreciation expense nevertheless stayed at about €60m. A note reveals that the useful lives of furnaces were extended from 8 to 15 years and residual values raised from 5% to 20% of cost. Operating profit rose 12%, exactly meeting management’s bonus target. Revenue was flat.",
+"qs": [
+[
+"Why did depreciation not rise?",
+[
+"The bigger asset base was offset by longer lives and higher residual values: (cost − residual) ÷ life fell for every euro of cost.",
+"It uses the formula and both changed assumptions."
+],
+[
+"Because depreciation is an allocation of cost based on assumptions about useful lives and residual values, not a cash payment for the furnaces.",
+"True, but it does not explain why the number stayed flat."
+],
+[
+"Because the useful lives of the furnaces were extended from 8 to 15 years, which spreads their cost over almost twice as many periods.",
+"True, but it ignores the residual-value change."
+],
+[
+"Because the new furnaces were paid for in cash, so their full cost was already recognised as an expense when they were bought.",
+"How an asset is paid for has nothing to do with depreciation."
+]
+],
+[
+"How should the 12% rise in operating profit be read?",
+[
+"Mostly an effect of changed assumptions, not operations (revenue is flat): weaker earnings quality, and the bonus timing is a warning sign.",
+"It connects the assumptions, the flat revenue and the incentive."
+],
+[
+"It does not change cash flows at all: depreciation is non-cash, so the cash Ferrocast generates is the same under either set of assumptions.",
+"True, but it is not an interpretation of the profit."
+],
+[
+"It may be legitimate if engineering evidence shows that the new furnaces really last 15 years and keep a 20% residual value at the end.",
+"A fair caveat, but the facts point the other way."
+],
+[
+"As evidence that the new furnaces are already generating higher operating cash flow, since operating profit rose by 12%.",
+"Depreciation changes do not move cash."
+]
+],
+[
+"Which course case is closest?",
+[
+"Waste Management: extended depreciation lives (and capitalised costs) pushed expenses into future periods.",
+"Same lever: useful lives."
+],
+[
+"WorldCom, which moved routine costs from the income statement to the balance sheet and overstated its profit by billions.",
+"Similar effect, but WorldCom capitalised operating costs rather than changing lives."
+],
+[
+"Toshiba, where management manipulated accounting estimates for years under strong internal pressure to report better profits.",
+"Similar spirit, but its tool was percentage-of-completion."
+],
+[
+"Enron, which used separate special-purpose entities to keep its debt and losses off the balance sheet.",
+"Not related to depreciation."
+]
+]
+]
+},
+{
+"n": "GreenLeaf Grocers",
+"p": "GreenLeaf Grocers had a warehouse flood in November. The insurers’ surveyors estimate the damaged stock at €6m and expect to reimburse about €4m. A new CEO, appointed in October, wrote off €14m of inventory (including stock in undamaged warehouses), booked a €10m provision for “possible future disruptions” and recognised no insurance receivable. 2026 shows a large loss; the CEO promises “a dramatic turnaround” in 2027.",
+"qs": [
+[
+"How do you classify management’s choices?",
+[
+"A “big bath”: losses beyond what the evidence supports are front-loaded under a new CEO, so later reversals can create an artificial turnaround.",
+"Classification, evidence, incentive and consequence."
+],
+[
+"Not neutral, because management’s figures ignore the surveyors’ evidence of about €6m of damage and €4m of expected reimbursement.",
+"True, but it does not name the pattern or its future effect."
+],
+[
+"Material, so the flood loss must be presented separately rather than buried inside cost of sales or other operating expenses.",
+"True, but materiality decides presentation, not whether the amounts are right."
+],
+[
+"Informative, because writing off everything now removes uncertainty and makes the next years cleaner and easier for investors to read.",
+"It adds bias. Unjustified pessimism is as misleading as optimism."
+]
+],
+[
+"What is the likely effect on 2027?",
+[
+"If the excess write-offs and the €10m provision are reversed or unused, 2027 profit is inflated with no real operating improvement.",
+"That is the “turnaround” mechanism."
+],
+[
+"Stock that was written off but is still saleable will produce unusually high margins in 2027, because it is sold with no cost attached.",
+"True, and part of the same effect, but narrower."
+],
+[
+"The insurance payment, when it arrives, will boost 2027 profit, because no insurance receivable was recognised in 2026.",
+"True, because no receivable was recognised, but it is only one piece."
+],
+[
+"2027 operating cash flow will fall by about €24m, because the inventory write-offs and the provision will then have to be paid out.",
+"Write-offs and provisions are not cash. They change profit, not cash."
+]
+],
+[
+"Which treatment would be informative?",
+[
+"Write off €6m, book a ~€4m insurance receivable backed by the surveyors, disclose the uncertainty, and no vague provision.",
+"Evidence-based, neutral and transparent (like Intermarché Case B)."
+],
+[
+"Write off the €6m of damaged stock and wait until the insurance cash is actually received before recognising any recovery at all.",
+"Close, but it ignores a recovery that the evidence already supports."
+],
+[
+"Disclose the flood, its estimated impact on inventory and the uncertainty about the insurance claim clearly in the notes.",
+"Needed, but it does not fix the numbers."
+],
+[
+"Write nothing off until the damaged stock is actually sold at a loss, so that the loss is based on real prices rather than estimates.",
+"That delays recognising a loss that is already known."
+]
+]
+]
+},
+{
+"n": "Nimbus Software",
+"p": "Nimbus capitalised €30m of 2026 costs as an intangible asset called “customer acquisition and platform development”, amortised over 10 years. €22m of it is advertising and sales commissions; €8m is coding of a new module that is technically feasible and will be sold from 2027. Its main competitor expenses all such costs. Nimbus reports an operating profit of €12m; the competitor reports a loss.",
+"qs": [
+[
+"What is the most accurate assessment?",
+[
+"The €22m of advertising and commissions supports current revenue and should be expensed; without it Nimbus would show a loss too.",
+"It separates the two parts and shows what the headline profit depends on."
+],
+[
+"The €8m of coding for a technically feasible module that will be sold from 2027 may well meet the recognition criteria for an intangible asset.",
+"True, but it only covers the smaller part."
+],
+[
+"Capitalising these costs makes Nimbus much less comparable with its main competitor, which expenses all similar costs and reports a loss.",
+"True, but it is a consequence, not the assessment."
+],
+[
+"Capitalisation is fine, because the €30m was actually paid in cash and is fully supported by invoices, so the amount is verifiable.",
+"Being verifiable does not make a cost an asset. It must bring future benefits that the firm controls."
+]
+],
+[
+"Which principle is most at stake for the €22m?",
+[
+"Matching: costs that generate current revenue belong in this period; spreading them over 10 years defers expenses to the future.",
+"The core principle for capitalise-vs-expense decisions."
+],
+[
+"Recognition: to be capitalised, the costs must first meet the definition of an asset, with control and probable future economic benefits.",
+"True and related, but it is the gatekeeper, not the timing principle the question targets."
+],
+[
+"Prudence: under uncertainty about future benefits, assets should not be overstated, and €30m of capitalised spending may well do that.",
+"True, but secondary."
+],
+[
+"The cost principle: assets must be recorded at what they cost, so recording the €30m at its cost is the correct treatment.",
+"The cost principle measures assets. It does not decide whether something is an asset at all."
+]
+],
+[
+"If the capitalisation stands, what happens in 2027–2035?",
+[
+"Future years carry amortisation for costs that already earned 2026 revenue: profit has been shifted forward into 2026.",
+"It explains the timing transfer."
+],
+[
+"Total expense over the ten years is the same whether the costs are capitalised or expensed; only the timing between the years changes.",
+"True, but it does not say which direction profit moved."
+],
+[
+"2026 operating cash flow also looks better than the competitor’s, because the capitalised payments are reported as investing outflows.",
+"True and subtle, but the question is about future profits."
+],
+[
+"Future profits will be higher, because the intangible asset generates amortisation income every year until 2035.",
+"Amortisation is an expense, not income."
+]
+]
+]
+},
+{
+"n": "Coastline Construction",
+"p": "Coastline is building a hospital for €100m under a three-year contract, with total estimated costs of €80m. At 31 December 2026 management says the project is 75% complete and recognises €75m of revenue and €15m of profit. The independent engineer’s report, summarised in the notes, puts completion at 50%. Costs incurred to date are €40m. The client has paid €30m.",
+"qs": [
+[
+"How should the analyst interpret the 2026 figures?",
+[
+"Overstated by about €25m: costs (€40m of €80m) and the engineer both say 50%, i.e. revenue €50m and profit €10m.",
+"It uses two independent pieces of evidence and quantifies the gap."
+],
+[
+"Percentage of completion is a judgment area where management has a lot of discretion, which is exactly why the engineer’s report matters.",
+"True, but it does not reach a conclusion."
+],
+[
+"Only €30m of cash has been received, so most of the €75m of revenue is not yet backed by any cash from the client.",
+"True, but revenue does not require cash. The issue is the stage of completion."
+],
+[
+"Revenue should be €30m, because under accrual accounting revenue equals the cash that the client has paid so far.",
+"Accrual accounting recognises revenue as work is performed, not as cash comes in."
+]
+],
+[
+"Compared with the engineer’s view, management’s figures…",
+[
+"Raise 2026 revenue by €25m and profit by €5m, leave cash unchanged, and push the shortfall into the remaining years of the contract.",
+"Complete: IS, CFS and timing across periods."
+],
+[
+"Leave operating cash flow unchanged, because the stage-of-completion estimate does not change anything that the client has actually paid.",
+"True, but incomplete."
+],
+[
+"Increase the amount owed by the client on the balance sheet, because more revenue has been recognised than has been billed or paid.",
+"True, but incomplete."
+],
+[
+"Increase the total profit earned over the whole three-year contract, since more of the profit is recognised in the first year.",
+"Total profit is still €20m. Only its timing changes."
+]
+],
+[
+"Which course case does this most resemble?",
+[
+"Toshiba, which overstated its profits for years by manipulating percentage-of-completion estimates.",
+"Same estimate, same mechanism."
+],
+[
+"WorldCom, whose profits were overstated by billions through accounting choices that its auditors did not catch in time.",
+"Profit was overstated, but by capitalising costs, not by completion estimates."
+],
+[
+"Wirecard, which recorded amounts in its accounts that independent parties could never verify.",
+"Partly similar, but Wirecard’s cash was fictitious."
+],
+[
+"Meta, whose market value reflects resources that the balance sheet simply cannot capture.",
+"Unrelated."
+]
+]
+]
+}
+]
+},
+{
+"t": "Midterm 3",
+"cases": [
+{
+"n": "Brightwell vs Corvex",
+"p": "Brightwell Pharma spent €120m on internal research in 2026, all expensed, and reports a net loss of €20m. Its market value is five times its book equity. Its rival Corvex did no research but paid €120m to buy a portfolio of patents from a university spin-off; Corvex reports the patents as an intangible asset and a net profit of €80m.",
+"qs": [
+[
+"Why are the two firms reported so differently?",
+[
+"A purchase gives a reliable measure, so bought patents are recognised; internal research is not. Similar investments, different accounts.",
+"Recognition and measurement logic explains the whole gap."
+],
+[
+"Brightwell’s research is expensed because its future benefits are still uncertain and cannot yet be reliably measured in money.",
+"True, but it explains only one side."
+],
+[
+"Corvex will amortise the purchased patents over their useful lives, so its €120m cost will be spread over many future periods.",
+"True, but it does not explain why Brightwell cannot do the same."
+],
+[
+"Brightwell made a mistake: under the cost principle, all research spending must be capitalised at what it cost the company.",
+"Internally generated research generally fails the recognition tests."
+]
+],
+[
+"What does Brightwell’s high market-to-book ratio most likely tell you?",
+[
+"Investors value resources the balance sheet can’t show (pipeline, know-how, people): a limit of measurement, not an error.",
+"It links the market signal to the accounting limitation."
+],
+[
+"The balance sheet understates Brightwell’s economic resources compared with what investors believe the whole firm is worth.",
+"True, but it stops short of saying why."
+],
+[
+"Investors expect the research pipeline to produce substantial future cash flows that are not reflected in the current loss.",
+"True, but it misses the accounting point."
+],
+[
+"Brightwell’s assets are overstated, and the market is paying far too much for a company that is making losses.",
+"The opposite: they are understated."
+]
+],
+[
+"How should an analyst compare the two?",
+[
+"Put them on the same basis (e.g. total innovation investment) before judging, instead of concluding Corvex is better.",
+"It fixes the comparability problem before judging."
+],
+[
+"Note that each firm spent €120m of cash on innovation in 2026, so their economic investment was essentially the same size.",
+"True and useful, but not a full method."
+],
+[
+"Read Brightwell’s MD&A on its research pipeline, to understand what the expensed spending may produce in future years.",
+"Useful context, but it does not solve the comparison."
+],
+[
+"Conclude that Corvex is more profitable and less risky, since it reports €80m of profit and a stronger balance sheet.",
+"That mistakes an accounting difference for an economic one."
+]
+]
+]
+},
+{
+"n": "Quarry & Sons",
+"p": "Quarry & Sons, a building-materials company, reported a net profit in each of the last three years and carries its quarries and plant at €500m. Operating cash flow was negative in all three years. A €300m bond matures in eight months, banks have declined to refinance it, and the company is close to breaching a debt covenant. The auditor’s report includes an emphasis-of-matter paragraph on going concern. Depreciation continues on the usual schedule.",
+"qs": [
+[
+"What is the central issue?",
+[
+"Going concern is in doubt, and the €500m and the profits only make sense if the firm survives.",
+"It names the assumption and what depends on it."
+],
+[
+"Profits are not backed by operating cash flow, which has been negative in each of the last three years.",
+"A true red flag, but a symptom of the deeper issue."
+],
+[
+"The company relies on a €300m bond that must be refinanced within eight months, and the banks have already refused to do so.",
+"True, but it is one cause, not the central accounting issue."
+],
+[
+"The company should stop depreciating its assets until refinancing is secured, so that its profit and covenant ratios are protected.",
+"Depreciation reflects the use of assets. Stopping it would make profit look even better."
+]
+],
+[
+"Which course case does this most resemble?",
+[
+"Carillion: profits and asset values while cash flows were weak, debt rising and covenants tight.",
+"Same pattern."
+],
+[
+"Wirecard, where serious concerns were raised in the auditor’s work shortly before the company collapsed.",
+"Partly similar, but Wirecard was about fictitious cash."
+],
+[
+"Enron, which collapsed despite reporting profits and a healthy-looking financial position right up to the end.",
+"Partly similar, but Enron hid debt off the balance sheet."
+],
+[
+"Netflix, which capitalises content costs and amortises them over expected viewing patterns.",
+"Unrelated."
+]
+],
+[
+"What should the analyst check?",
+[
+"Covenant headroom, refinancing plans, cash forecasts, the going-concern note, and whether the debt is really long-term.",
+"The checks the course lists for going-concern risk."
+],
+[
+"The wording of the auditor’s report, especially the emphasis-of-matter paragraph on going concern and what it refers to.",
+"Helpful, but only one input."
+],
+[
+"Recent dividend payments, which drain cash that the company badly needs in order to repay its bond.",
+"Relevant as a cash drain, but not central."
+],
+[
+"Whether depreciation is straight-line or accelerated, since that choice drives the reported profit each year.",
+"The method is not the issue."
+]
+]
+]
+},
+{
+"n": "UrbanFit Gyms",
+"p": "UrbanFit runs 300 gyms. For four years in a row it has excluded “one-off restructuring costs” (€25m–€40m a year) from its “adjusted EBITDA”, which grew from €50m to €110m. Over the same period its IFRS net loss widened from €20m to €90m and its cash burn increased. Management calls the adjusted figure “the best measure of our underlying performance”.",
+"qs": [
+[
+"What is the most accurate assessment?",
+[
+"Costs that recur every year are not one-off; excluding them flatters performance and hides the IFRS losses and cash burn.",
+"It identifies the false label and its consequence."
+],
+[
+"Non-GAAP measures such as adjusted EBITDA can be useful to investors, provided they are clearly reconciled to the IFRS figures.",
+"True in general, but it is not an assessment of this case."
+],
+[
+"The restructuring costs, at €25m–€40m a year, are clearly material compared with adjusted EBITDA of €50m–€110m.",
+"True, but it is only part of the problem."
+],
+[
+"Adjusted EBITDA is more reliable than IFRS profit here, because it strips out noise and shows the underlying performance of the gyms.",
+"Here it removes recurring costs, not noise. GAAP is the anchor."
+]
+],
+[
+"Which principles are misapplied?",
+[
+"Materiality and consistency: material recurring costs keep being called non-recurring, moving the line of “performance”.",
+"The course’s verdict for exactly this pattern."
+],
+[
+"Neutrality: the presentation seems chosen to show a favourable picture rather than to represent the company’s performance faithfully.",
+"True, but less specific."
+],
+[
+"Comparability over time is reduced, because what counts as “underlying performance” keeps changing from one year to the next.",
+"True, but a consequence."
+],
+[
+"The cost principle, because the gyms should be measured at their historical cost rather than at adjusted values.",
+"Not relevant to how performance is defined."
+]
+],
+[
+"Which course case does this most resemble?",
+[
+"WeWork, whose adjusted earnings suggested improvement while its GAAP losses and cash burn widened.",
+"Same pattern."
+],
+[
+"Waste Management, which made its earnings look smooth and predictable until later corrections collapsed its profits.",
+"Partly similar, but through depreciation and capitalisation."
+],
+[
+"Toshiba, where reported performance was shaped for years by internal pressure to show better results.",
+"Partly similar, but through estimates."
+],
+[
+"Enron, which used separate entities to hide large amounts of debt off its balance sheet.",
+"Unrelated."
+]
+]
+]
+},
+{
+"n": "Lisbon Ceramics",
+"p": "Lisbon Ceramics bought land for its factory for €2m in 2011. In 2026, without any sale or independent valuation, the board wrote the land up to €9m based on “what a neighbouring plot is rumoured to have sold for”, crediting equity. Its debt-to-equity ratio fell from 1.8 to 1.1, just below the 1.2 limit in its bank loan covenant.",
+"qs": [
+[
+"What is the most accurate assessment?",
+[
+"It breaks the cost principle (no transaction, no evidence), and landing just under the covenant suggests leverage management.",
+"Principle, evidence and incentive together."
+],
+[
+"The €9m figure is more up to date than €2m but much less verifiable, which is the classic trade-off between relevance and reliability.",
+"True trade-off, but it does not reach a verdict."
+],
+[
+"Leverage improved only on paper: the company’s cash, its debt and its ability to repay are exactly the same as before the write-up.",
+"True, but it misses the principle."
+],
+[
+"The write-up is correct, because land does not depreciate and normally rises in value over a period of fifteen years.",
+"Rising value is not evidence. Without a transaction it is just a belief."
+]
+],
+[
+"What should the lender conclude?",
+[
+"The covenant holds only thanks to an unverifiable estimate; risk is unchanged, so recompute leverage at cost.",
+"It removes the cosmetic effect."
+],
+[
+"Equity rose by €7m because of the write-up, which is exactly what moved the debt-to-equity ratio from 1.8 down to 1.1.",
+"True arithmetic, but not a conclusion."
+],
+[
+"The company should disclose the basis of the valuation, so that the lender can judge how reliable the €9m figure really is.",
+"Good practice, but it does not change the lender’s view of the risk."
+],
+[
+"Risk fell, because the company is now worth more and has more valuable assets to offer the bank as security.",
+"Nothing economic changed."
+]
+],
+[
+"If the land’s value later truly fell below €2m, what would happen?",
+[
+"An impairment to recoverable amount: historic cost is corrected downwards, never written up without evidence.",
+"It shows the asymmetry of the cost principle."
+],
+[
+"A loss would be recognised in profit for that year, reducing both the reported result and the company’s equity.",
+"True, but it misses the mechanism."
+],
+[
+"The debt-to-equity ratio would rise again, possibly back above the 1.2 limit in the covenant.",
+"True, but it is a consequence."
+],
+[
+"Nothing would happen: assets recorded at cost are never written down, they are only depreciated over time.",
+"Impairment is exactly the correction for outdated historic cost."
+]
+]
+]
+}
+]
+},
+{
+"t": "Midterm 4",
+"cases": [
+{
+"n": "TechGrid",
+"p": "TechGrid sells networking equipment to distributors. On 29–31 December it shipped €50m of equipment, 20% of its annual sales, and recognised it all as revenue. Distributors may return any unsold units within 60 days for a full refund. In the previous two years, about 40% of late-December shipments came back in January. No refund liability or returns estimate was recorded.",
+"qs": [
+[
+"What is the most accurate assessment?",
+[
+"Overstated: with 40% returns usual, about €20m should not be revenue (or needs a refund liability). This is aggressive cut-off.",
+"It uses the evidence to quantify and names the practice."
+],
+[
+"The goods were physically shipped before the year-end, so at least part of the €50m of revenue may well belong to 2026.",
+"Partly true, but it ignores the expected returns."
+],
+[
+"Receivables will rise sharply at year-end, since the distributors have not yet paid for the late-December shipments.",
+"True, but a symptom, not the assessment."
+],
+[
+"There is no issue: any returns will happen in January, so they belong to next year’s accounts, not to 2026.",
+"Expected returns are known now and belong in this year’s estimate."
+]
+],
+[
+"Which red flag from the course fits best?",
+[
+"Aggressive revenue cut-off: revenue recognised early, right at the end of the period (the “revenue mirage”).",
+"The precise flag."
+],
+[
+"Receivables growing faster than revenue, because the €50m of late-December shipments is still unpaid at the year-end.",
+"Likely visible too, but a consequence."
+],
+[
+"Profits not backed by operating cash flow, because the December revenue has not been collected from the distributors.",
+"Likely visible too, but a consequence."
+],
+[
+"Heavy reliance on short-term debt, because a company that ships on 60-day credit terms needs short-term financing.",
+"Unrelated to the facts."
+]
+],
+[
+"What happens when the returns arrive in January?",
+[
+"Revenue and receivables reverse: 2026 profit was borrowed from 2027 and was never sustainable.",
+"Timing and sustainability."
+],
+[
+"Inventory goes back up as the returned units come back into TechGrid’s warehouses in January.",
+"True, but incomplete."
+],
+[
+"2026 operating cash flow was never affected, because the distributors had not yet paid for the goods.",
+"True, but it misses the profit effect."
+],
+[
+"The returns increase 2027 revenue, because the returned goods can then be sold again to other customers.",
+"Returns reduce revenue."
+]
+]
+]
+},
+{
+"n": "Douro Wines",
+"p": "Douro Wines’ accountant presents a trial balance in which debits equal credits and argues the accounts “must be right”. The auditor finds three items: (1) December wages of €2m were earned but not recorded, because they are paid in January; (2) on 1 November the company paid €1.2m for 12 months of warehouse rent and expensed all of it; (3) a €0.5m routine repair was recorded as equipment.",
+"qs": [
+[
+"What is the best response to the accountant?",
+[
+"Balance proves consistency only: all three errors keep debits = credits while misstating expenses, assets and liabilities.",
+"It answers the claim with the course’s logic."
+],
+[
+"Item 1 is an accrual that was missed: the wages were earned in December, so the expense belongs to 2026 even though they are paid in January.",
+"True, but it covers only one item."
+],
+[
+"Adjusting entries are needed before the statements are prepared, which is exactly why this list is called the unadjusted trial balance.",
+"True, but it does not answer why “balanced” is not “right”."
+],
+[
+"The accountant is right: the trial balance would have shown a difference between debits and credits if any of these errors existed.",
+"None of them breaks debits = credits."
+]
+],
+[
+"What is the net effect on 2026 profit of fixing all three items?",
+[
+"Profit falls by €1.5m in total: −€2m for wages, +€1m for rent (only €0.2m belongs to 2026), −€0.5m for the repair.",
+"All three items, with the right direction."
+],
+[
+"Profit falls by €2m, because the December wages must be recognised as an expense in 2026 even though they are paid in January.",
+"Only one of three items."
+],
+[
+"Profit rises by €1m, because ten of the twelve months of rent paid on 1 November belong to 2027, not 2026.",
+"Only one of three items."
+],
+[
+"Profit is unchanged, because none of the three items involves a cash movement in the 2026 financial year.",
+"Accruals change profit without cash."
+]
+],
+[
+"After fixing them, how does the balance sheet change?",
+[
+"Wages payable rise by €2m, a €1m prepaid rent asset appears, and equipment falls by €0.5m.",
+"Every balance-sheet effect."
+],
+[
+"Liabilities rise by €2m, because the unpaid December wages must be recognised as wages payable at the year-end.",
+"True, but incomplete."
+],
+[
+"A prepaid rent asset of €1m appears, for the ten months of warehouse rent that have been paid but not yet used.",
+"True, but incomplete."
+],
+[
+"Cash falls by €2m, because recognising the December wages as an expense means they are paid in 2026.",
+"The wages are paid in January. December cash is unaffected."
+]
+]
+]
+},
+{
+"n": "Medisupply",
+"p": "Medisupply sells medical consumables to private clinics. In 2026 the economy entered recession, two large clinic chains filed for insolvency, and the average collection period rose from 45 to 80 days. Medisupply cut its allowance for doubtful accounts from 6% to 2% of receivables, citing “improved credit procedures”. Net income rose 15%.",
+"qs": [
+[
+"What is the most accurate assessment?",
+[
+"Cutting it against the evidence boosts profit now and stores up write-offs later, so earnings quality is low.",
+"Evidence, effect and consequence."
+],
+[
+"The allowance is an estimate, so management has legitimate discretion to lower it when its credit procedures have genuinely improved.",
+"True in general, but not here."
+],
+[
+"Part of the 15% rise in net income comes directly from lowering the allowance from 6% to 2% of receivables.",
+"True, but it describes rather than assesses."
+],
+[
+"The lower allowance increases the cash collected from customers, which improves Medisupply’s liquidity in a recession.",
+"An allowance does not move cash."
+]
+],
+[
+"Which course example is closest?",
+[
+"The course’s bad-debt scenario in a weak economy (profit up now, write-offs later), the same lever as NVIDIA’s allowance.",
+"Exact match with the scenario and the example."
+],
+[
+"NVIDIA, where a lower estimate for the allowance for doubtful accounts means higher reported earnings for the period.",
+"True, but it misses the weak-economy context."
+],
+[
+"Tesla, where lowering an estimate (the warranty provision) inflates current profit and pushes costs into later periods.",
+"Similar logic, but warranties, not receivables."
+],
+[
+"Enron, which used off-balance-sheet entities to hide obligations from investors and lenders.",
+"Unrelated."
+]
+],
+[
+"What should the analyst do?",
+[
+"Re-estimate losses from the ageing and the insolvencies, check the disclosed assumptions, and treat profit as overstated meanwhile.",
+"Full approach."
+],
+[
+"Look at the ageing of receivables in the notes to see how much of the balance is overdue, and by how long.",
+"Useful, but only one step."
+],
+[
+"Compare Medisupply’s allowance rate with those of peers that sell to the same kind of private clinics.",
+"Useful, but only one step."
+],
+[
+"Ignore it: allowances for doubtful accounts are immaterial by nature and rarely change reported profit by much.",
+"Materiality depends on size and context. Here it moved profit by a lot."
+]
+]
+]
+},
+{
+"n": "AirCo",
+"p": "AirCo, a European airline, reports debt of €1.2bn and equity of €2bn. Its notes disclose €3bn of aircraft lease commitments that, under the rules then in force, are not recognised on the balance sheet. The MD&A notes that fuel and lease payments are its two largest cash outflows. A competitor that owns its aircraft reports debt of €4bn and equity of €2bn.",
+"qs": [
+[
+"What is the most accurate comparison?",
+[
+"Add the €3bn of leases and AirCo owes about €4.2bn, much like its rival: the gap is financing form, not lower risk.",
+"It adjusts and then compares."
+],
+[
+"The lease commitments are disclosed in the notes, so all the information needed to compare the two airlines properly is available to investors.",
+"True, but not a comparison."
+],
+[
+"On the reported figures, AirCo’s debt-to-equity ratio of 0.6 looks much healthier than the competitor’s ratio of 2.0.",
+"True on paper, but superficial."
+],
+[
+"AirCo is less risky than its competitor, because it has far less debt on its balance sheet for the same amount of equity.",
+"It ignores obligations that are economically similar to debt."
+]
+],
+[
+"Which part of the annual report reveals the key fact?",
+[
+"The notes to the financial statements, which disclose the commitments that the primary statements leave out.",
+"The source of the lease commitments."
+],
+[
+"The MD&A, which explains that lease payments are one of AirCo’s two largest cash outflows each year.",
+"Helpful, but it does not give the amount."
+],
+[
+"The risk factors, where an airline typically discusses its exposure to fuel prices, financing and leasing.",
+"Possibly relevant, but not where the number is."
+],
+[
+"The trial balance, which lists every obligation of the company, including its lease commitments.",
+"Not published, and unrecognised items are not in it anyway."
+]
+],
+[
+"What is the general lesson?",
+[
+"Recognition decides which obligations are visible, so read the notes and adjust ratios before comparing firms.",
+"The course’s point about recognition and notes."
+],
+[
+"Different financing choices (leasing versus owning aircraft) reduce comparability between the balance sheets of airlines.",
+"True, but narrower."
+],
+[
+"Lease payments are a heavy and recurring cash outflow that will reduce AirCo’s cash every year for a long time.",
+"True, but not the lesson."
+],
+[
+"Leases are not real obligations, because the airline does not own the aircraft it flies and can simply return them.",
+"Ownership is not what makes an obligation real."
+]
+]
+]
+}
+]
+},
+{
+"t": "Midterm 5",
+"cases": [
+{
+"n": "FrescoMart",
+"p": "Hackers took control of FrescoMart’s refrigeration systems over a weekend in October, destroying fresh and frozen stock that cost €8m. Insurers have confirmed cover “up to €5m, subject to final assessment”. Some freezers may need replacing. Management proposes to write off €2m now, recognise an insurance receivable of €8m and describe the event as “temporary”.",
+"qs": [
+[
+"How do you classify management’s proposal?",
+[
+"Aggressive: too little written off and more insurance than confirmed, overstating assets and profit (against neutrality and prudence).",
+"Like Intermarché Case A."
+],
+[
+"The €8m insurance receivable goes beyond the evidence, since the insurer has only confirmed cover of up to €5m subject to assessment.",
+"True, but only one of the problems."
+],
+[
+"The €2m write-off is far too small, because stock with a cost of €8m was actually destroyed during the attack.",
+"True, but only one of the problems."
+],
+[
+"Informative, because insurance will eventually cover the loss and management is right that the disruption is only temporary.",
+"Not all of it, and not without assessment."
+]
+],
+[
+"What would an informative treatment look like?",
+[
+"Write off €8m, book insurance only as far as evidence goes (≤ €5m, if probable), test the freezers and disclose the uncertainty.",
+"Evidence-based and complete (Case B)."
+],
+[
+"Write off the full €8m now and recognise no insurance at all until the insurer’s cash actually arrives in the bank.",
+"Cautious, but it ignores a recovery the evidence may support."
+],
+[
+"Test the damaged freezers for impairment and write them down if their recoverable amount has fallen below their carrying amount.",
+"Needed, but only one part."
+],
+[
+"Recognise revenue on the destroyed stock, since it was bought to be sold and would have been sold if the attack had not happened.",
+"No performance obligation was satisfied."
+]
+],
+[
+"What does the cash flow statement show on the day of the attack?",
+[
+"No cash flow yet: profit falls when the loss is recognised; cash moves later (insurance in, new freezers out).",
+"Events can affect earnings before cash."
+],
+[
+"Replacing the damaged freezers will appear later in the cash flow statement as an investing outflow.",
+"True, but not about the day of the attack."
+],
+[
+"The insurance payment received later will appear in the cash flow statement as a cash inflow.",
+"True, but not about the day of the attack."
+],
+[
+"An €8m operating outflow on the day of the attack, equal to the cost of the destroyed stock.",
+"The stock was paid for earlier. Destroying it moves no cash."
+]
+]
+]
+},
+{
+"n": "Solaris Energy",
+"p": "Solaris Energy operates a solar plant carried at €80m. In 2026 the government cut the feed-in subsidy, and Solaris’ own forecast of the plant’s discounted future cash flows fell to €30m. Management argues that “the subsidy will probably be restored after the next election” and records no impairment. The impairment note gives no discount rate or sensitivity analysis.",
+"qs": [
+[
+"What is the most accurate assessment?",
+[
+"Impair by about €50m: recoverable €30m is below carrying €80m, and a hoped-for subsidy only delays the loss.",
+"Numbers, rule and judgment."
+],
+[
+"Impairment tests rely heavily on management’s judgments about future cash flows, discount rates and government policy.",
+"True, but no conclusion."
+],
+[
+"The missing discount rate and sensitivity analysis make management’s judgment very hard for outsiders to verify.",
+"True, but secondary."
+],
+[
+"No impairment is needed, because the plant is still operating normally and producing electricity every day.",
+"Operating does not mean recoverable."
+]
+],
+[
+"What is the effect of avoiding the impairment?",
+[
+"Profit and assets overstated by ~€50m now; a later, maybe larger write-down would reveal the deferred loss.",
+"The course’s “aggressive” impairment example."
+],
+[
+"Equity is overstated, because the plant is carried in the balance sheet above the amount it can recover.",
+"True, but incomplete."
+],
+[
+"Future depreciation charges will be higher than they would be after an impairment, depressing future profits.",
+"True and subtle, but secondary."
+],
+[
+"Operating cash flow is overstated by €50m, because the plant is carried at too high a value.",
+"Impairment is not a cash flow."
+]
+],
+[
+"What assumption must hold for the €80m to be justified?",
+[
+"That the subsidy comes back soon; the analyst should test how sensitive the value is to that.",
+"The key analytical question."
+],
+[
+"That the discount rate used in Solaris’ cash-flow forecast is low enough to justify the carrying amount.",
+"Relevant, but secondary to the subsidy."
+],
+[
+"That the plant keeps operating for the whole of its remaining useful life without major interruptions.",
+"Necessary, but far from enough."
+],
+[
+"That the plant’s original construction cost was recorded correctly when it was built.",
+"The original cost is not in question."
+]
+]
+]
+},
+{
+"n": "Orbit Electronics",
+"p": "Orbit Electronics reports net income of €25m (up 30%) but operating cash flow of −€5m. Sales grew 5%. Inventories rose 60%, which the notes describe as “strategic stock-building ahead of a product launch”. The launch has been delayed twice. The inventory note says nothing about write-downs for obsolete stock.",
+"qs": [
+[
+"What is the most accurate assessment?",
+[
+"The stock build-up ate the cash, and with a delayed launch it may be obsolete, so profit may be overstated.",
+"Cash gap, red flag and valuation risk together."
+],
+[
+"Inventory growing far faster than sales (60% against 5%) is one of the course’s red flags for weak demand or obsolete stock.",
+"True, but only part."
+],
+[
+"Building stock ahead of a major product launch can be a legitimate reason for weak operating cash flow in the meantime.",
+"True as a possibility, but the delays undermine it."
+],
+[
+"Negative operating cash flow is caused by depreciation of Orbit’s production equipment, which is a large expense.",
+"Depreciation is not a cash flow."
+]
+],
+[
+"Which adjustment is most likely missing?",
+[
+"Estimation & valuation: a write-down of the inventory for obsolete and slow-moving stock.",
+"The judgment-heavy adjustment the facts point to."
+],
+[
+"Better disclosure, in the inventory note, of the assumptions about obsolete and slow-moving stock.",
+"Needed, but disclosure is not the adjustment."
+],
+[
+"Matching: if the stock cannot be sold, its cost belongs in this period’s profit rather than in future periods.",
+"True, and it is the reason for the write-down, but it does not name the adjustment."
+],
+[
+"Deferral: the cost of the extra inventory should be spread over the future periods in which it will be sold.",
+"That would delay a loss."
+]
+],
+[
+"What is the key analyst question?",
+[
+"Would profit survive a realistic stock write-down, and when does the stock become cash?",
+"Earnings quality and cash conversion."
+],
+[
+"How much cash does Orbit still have available to fund further stock-building before the delayed launch?",
+"Relevant, but narrower."
+],
+[
+"What does the MD&A say about the reasons for the two delays and about the new launch date?",
+"Useful context."
+],
+[
+"Is the trial balance balanced, so that the inventory figure can be relied on?",
+"Irrelevant to valuation."
+]
+]
+]
+},
+{
+"n": "Kids’ Planet",
+"p": "In 2026 Kids’ Planet, a toy retailer, switched from accelerated to straight-line depreciation for store fittings, reclassified €12m of store-closure costs from “operating expenses” to “other items” below operating profit, and moved its year-end from 31 December to 31 January, after the Christmas peak. Operating profit rose 18%. The notes explain all three changes in one sentence: “to better reflect our business”.",
+"qs": [
+[
+"What is the most accurate assessment?",
+[
+"Three unexplained changes, all flattering the headline: a consistency red flag pointing to presentation, not operations.",
+"It names the pattern and its likely cause."
+],
+[
+"Consistency allows changes in accounting methods and classifications, provided they are properly justified and explained.",
+"True, but here the justification is missing."
+],
+[
+"The year-end change affects which period carries the Christmas results and the returns that usually follow in January.",
+"True, but only one change."
+],
+[
+"None of the changes affects operating profit; they only change how the information is presented in the notes.",
+"Depreciation and the reclassification both raise it."
+]
+],
+[
+"Which assumption does the year-end change relate to?",
+[
+"Accounting period: a post-Christmas year-end changes what the snapshot shows, so it may not be representative.",
+"The course’s retail year-end example."
+],
+[
+"Comparability with last year is reduced, because the two periods end at different points of the seasonal sales cycle.",
+"True, but a consequence."
+],
+[
+"Working capital will look better at the end of January, when cash is high and inventory is low after Christmas.",
+"True, but a consequence."
+],
+[
+"Going concern, because changing the year-end usually suggests doubts about the company’s ability to survive.",
+"Unrelated."
+]
+],
+[
+"What should the analyst do?",
+[
+"Restate like-for-like (same methods, classes and period), then compare operating profit.",
+"It removes all three effects."
+],
+[
+"Read the accounting-policy notes carefully to understand the reasons management gives for the three changes.",
+"Needed, but they say almost nothing here."
+],
+[
+"Compare Kids’ Planet’s new depreciation method with the methods used by other toy retailers.",
+"Useful, but covers one change."
+],
+[
+"Accept the new figures, since they have been audited and comply with the accounting standards.",
+"Audit checks compliance, not whether the presentation is helpful."
+]
+]
+]
+}
+]
+},
+{
+"t": "Midterm 6",
+"cases": [
+{
+"n": "Rio Textiles",
+"p": "Rio Textiles asks a bank for a five-year €20m loan to modernise a factory. Its statements show revenue of €150m (flat for three years), net income €9m, operating cash flow €4m, current assets €40m against current liabilities €38m, existing debt €60m and interest expense €6m. The segment note shows that one customer accounts for 45% of sales.",
+"qs": [
+[
+"What matters most to the lender?",
+[
+"Repayment capacity: cash flow below interest, a current ratio near 1 and customer concentration mean high credit risk.",
+"Cash, liquidity and concentration together."
+],
+[
+"Operating cash flow of €4m does not even cover the €6m of annual interest, before any repayment of principal.",
+"True, and central, but incomplete."
+],
+[
+"Dependence on a single customer for 45% of sales is a major risk to the stability of future cash flows.",
+"True, but incomplete."
+],
+[
+"Net income of €9m shows the company is profitable enough to pay the interest and repay the new loan safely.",
+"Loans are repaid with cash, not profit."
+]
+],
+[
+"Which statement best answers “can it pay interest and principal?”",
+[
+"The cash flow statement, read together with the debt maturities in the notes and the balance sheet.",
+"Cash generation plus obligations."
+],
+[
+"The balance sheet, which shows the liquidity position (current assets against current liabilities) and the existing debt.",
+"Helpful, but static."
+],
+[
+"The income statement, which shows the interest expense and how many times profit covers it.",
+"Shows the cost, not the ability to pay."
+],
+[
+"The income statement alone, since net income is the cash that is available to repay the loan.",
+"Profit is not cash."
+]
+],
+[
+"Why might net income (€9m) exceed operating cash flow (€4m)?",
+[
+"Working capital (receivables or stock) absorbing cash, or non-cash income; the lender must find out which.",
+"The general explanation plus the action."
+],
+[
+"Receivables may have grown during the year, so part of the profit has not yet been collected in cash.",
+"One possible cause."
+],
+[
+"Inventory may have grown during the year, so cash has been tied up in stock that has not been sold.",
+"One possible cause."
+],
+[
+"Depreciation is a large cash outflow that pulls operating cash flow below net income every year.",
+"The opposite: depreciation reduces profit but not cash."
+]
+]
+]
+},
+{
+"n": "SkyLow vs AzurAir",
+"p": "SkyLow and AzurAir fly similar European routes. SkyLow earns €55 per passenger with a 14% operating margin; it flies one aircraft type, turns planes around in 25 minutes and spends little on marketing. AzurAir earns €210 per passenger with a 9% margin; it runs lounges and a loyalty programme and spends heavily on its brand. Both face intense rivalry and price-sensitive customers who can switch easily.",
+"qs": [
+[
+"What is the most accurate description of their strategies?",
+[
+"Cost leadership vs differentiation, and each strategy leaves its own trace in revenue per passenger and costs.",
+"Strategies plus their financial traces."
+],
+[
+"SkyLow is very efficient, with standardised aircraft, fast turnarounds and very little spending on marketing.",
+"True, but partial."
+],
+[
+"AzurAir earns almost four times more per passenger, reflecting the premium services and brand it offers.",
+"True, but partial."
+],
+[
+"AzurAir is better managed, because it earns almost four times more per passenger than SkyLow does.",
+"Revenue per passenger reflects strategy, not management quality, and its margin is lower."
+]
+],
+[
+"What does industry structure suggest?",
+[
+"Rivalry, powerful customers, substitutes and high costs make high profits hard for both.",
+"Several forces combined, as in the course."
+],
+[
+"Customer power is high, because passengers are price-sensitive and can switch between airlines easily.",
+"True, but one force."
+],
+[
+"Rivalry is intense, because both airlines fly similar routes and compete for the same passengers.",
+"True, but one force."
+],
+[
+"High barriers to entry protect both airlines, which should allow them to earn consistently high profits.",
+"The course uses aviation as an example of hard profitability."
+]
+],
+[
+"How does AzurAir’s brand show up in its accounts?",
+[
+"Mostly expensed: lower margin now and no brand asset, a limit of recognition and measurement.",
+"Accounting treatment and its limits."
+],
+[
+"The brand builds customer loyalty and pricing power, which supports AzurAir’s much higher revenue per passenger.",
+"True economically, but not about the accounts."
+],
+[
+"AzurAir’s balance sheet understates its economic resources compared with what its brand is really worth.",
+"True, but it does not explain why."
+],
+[
+"AzurAir should record its brand as an intangible asset at its estimated market value.",
+"An internally built brand cannot be reliably measured."
+]
+]
+]
+},
+{
+"n": "NorthPeak Distribution",
+"p": "At NorthPeak Distribution, many fourth-quarter journal entries were entered in mid-January with descriptions such as “adjustment” or “various”. In the last week of the year €15m of costs were moved from “maintenance expense” to “equipment”, and €8m of customer deposits were moved from “contract liabilities” to “revenue”. The trial balance balances and management notes that “the system shows no errors”.",
+"qs": [
+[
+"What is the most accurate assessment?",
+[
+"Balance hides classification and timing choices worth up to €23m of profit, and vague, late entries weaken the audit trail.",
+"Balance, the profit effect and the audit trail."
+],
+[
+"The trial balance only checks that total debits equal total credits; it says nothing about classification or timing.",
+"True, but partial."
+],
+[
+"Large reclassifications in the last week of the year, just before the books close, are a red flag.",
+"True, but partial."
+],
+[
+"Because the trial balance balances and the system shows no errors, no further work is needed.",
+"Balance is not truth."
+]
+],
+[
+"The maintenance reclassification most resembles…",
+[
+"WorldCom: routine expenses capitalised as assets, overstating profit and assets.",
+"Exact mechanism."
+],
+[
+"Waste Management, which also capitalised costs that should have been expensed in the period.",
+"Also true of Waste Management, but its main lever was useful lives."
+],
+[
+"A breach of the matching principle, since current costs are pushed into future periods.",
+"True, but not a case."
+],
+[
+"Enron, which used separate entities to keep debt off its balance sheet.",
+"Enron is about off-balance-sheet entities."
+]
+],
+[
+"What does the deposit reclassification do?",
+[
+"It recognises revenue too early: revenue and equity are overstated by €8m, liabilities understated by €8m, and cash is unchanged.",
+"Complete effect."
+],
+[
+"Liabilities are understated by €8m, because the customer deposits were removed from contract liabilities.",
+"True, but partial."
+],
+[
+"Revenue is overstated by €8m, because it was recognised before the goods or services were delivered.",
+"True, but partial."
+],
+[
+"Operating cash flow rises by €8m, because the deposits are now counted as revenue instead of liabilities.",
+"The cash came in earlier and nothing moves now."
+]
+]
+]
+},
+{
+"n": "BookBarn",
+"p": "BookBarn sold €10m of gift cards in December 2026 and recognised the full €10m as revenue at the time of sale. Historically, 8% of gift cards are never redeemed, and most are used between January and March. BookBarn’s revenue rose 12%, and management highlights “strong holiday trading”.",
+"qs": [
+[
+"What is the most accurate assessment?",
+[
+"The €10m is an obligation to deliver books (contract liability), so 2026 revenue is overstated until cards are used.",
+"Obligation, timing and effect."
+],
+[
+"Cash received from selling gift cards is not the same thing as revenue earned from selling books to customers.",
+"True, but general."
+],
+[
+"The 8% of cards that are historically never redeemed will eventually become revenue when they expire.",
+"True, but a detail."
+],
+[
+"Recognising the revenue at sale is correct, because gift-card money is non-refundable once paid.",
+"Being non-refundable does not mean the obligation has been satisfied."
+]
+],
+[
+"What happens in the accounting equation when a card is redeemed?",
+[
+"Liability ↓ and revenue (equity) ↑; and, for the cost of the book, inventory ↓ and equity ↓.",
+"Both sides of the sale."
+],
+[
+"The contract liability decreases and revenue increases, which raises equity.",
+"True, but it misses the cost of goods sold."
+],
+[
+"Inventory decreases and the cost of goods sold reduces equity.",
+"True, but it misses the revenue."
+],
+[
+"Cash increases and revenue increases, because the customer finally buys the book with the card.",
+"The cash came in at the sale of the card."
+]
+],
+[
+"How should “strong holiday trading” be judged?",
+[
+"Split gift-card from merchandise sales and follow the liability and Q1 redemptions: some of the 12% is timing.",
+"It tests the claim directly."
+],
+[
+"Look at the cash flow statement to see how much cash the holiday season actually brought in.",
+"Useful, but cash includes the gift-card money too."
+],
+[
+"Compare BookBarn’s revenue growth with that of other book retailers over the same holiday season.",
+"Useful context."
+],
+[
+"Accept the claim, since revenue growth always reflects stronger trading.",
+"Revenue timing can create growth without trading."
+]
+]
+]
+}
+]
+}
+];
+function examItems(ctx){
+  var list=[];
+  EXAMS.forEach(function(ex,ei){
+    if(ctx!=="exam-mix"&&ctx!=="exam-"+ei)return;
+    ex.cases.forEach(function(c,ci){
+      c.qs.forEach(function(q,qi){
+        var opts=[["best",q[1]],["part",q[2]],["part",q[3]],["wrong",q[4]]].map(function(o,n){return {id:"o"+n,main:o[1][0],why:o[1][1],s:o[0],long:true}});
+        list.push({kind:"exam",tag:ex.t+" · "+c.n+" · Q"+(qi+1),
+          html:'<div class="case"><b>'+esc(c.n)+'</b><p>'+esc(c.p)+'</p></div><p class="qtext">'+esc(q[0])+'</p>',
+          options:shuffle(opts),answer:"o0",answerText:q[1][0],expl:q[1][1]});
+      });
+    });
+  });
+  return list;
+}
+function renderExams(){
+  var box=$("examList");box.innerHTML="";
+  EXAMS.forEach(function(ex,ei){
+    var b=document.createElement("button");b.type="button";b.className="chip";
+    var best=store("ledger-best-exam-"+ei+"-mc");
+    b.innerHTML="<b></b><small></small><small></small>";b.children[0].textContent=ex.t;
+    b.children[1].textContent=ex.cases.map(function(c){return c.n}).join(" · ");
+    b.children[2].textContent="12 questions"+(best?" · best: "+best:"");
+    b.onclick=function(){startQuiz("exam-"+ei,"mc")};box.appendChild(b);
+  });
+}
+$("examMix").onclick=function(){startQuiz("exam-mix","mc")};
 
 renderDefs();renderSetup();
 })();
