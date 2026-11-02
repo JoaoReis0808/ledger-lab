@@ -156,7 +156,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <button class="card" data-go="defs"><span class="n">01</span><b>Definitions</b><small>What each concept is and why it matters. Read the cards, then take the quiz.</small></button>
     <button class="card" data-go="memo"><span class="n">02</span><b>Memorise the lists</b><small>Fill in all 50 names from memory (elements, assumptions, principles, forces…), or spot the missing one.</small></button>
     <button class="card" data-go="setup"><span class="n">03</span><b>Name that concept</b><small>Scenarios, T-account logic, red flags and cases. Easy, medium or hard, multiple choice or typed answer.</small></button>
-    <button class="card" data-go="exams"><span class="n">04</span><b>Mock midterms</b><small>Six exams of company cases. Read the paragraph, then pick the BEST of four answers: three are partly right, only one is the most complete.</small></button>
+    <button class="card" data-go="exams"><span class="n">04</span><b>Mock midterms</b><small>Seven exams of company cases. Read the paragraph, then pick the BEST of four answers: three are partly right, only one is the most complete.</small></button>
   </div>
 </section>
 
@@ -209,7 +209,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   <h2>Mock midterms</h2>
   <p class="lead">Each midterm has four company cases with three questions each. Every question has one best answer, two that are partly right, and one that is wrong. Only the best answer scores. After each answer you see why every option scores the way it does.</p>
   <div class="chips" id="examList"></div>
-  <button class="ghost" style="align-self:flex-start" id="examMix">Mixed: 12 random questions from all six</button>
+  <button class="ghost" style="align-self:flex-start" id="examMix">Mixed: 12 random questions from all midterms</button>
 </section>
 
 <!-- SETUP -->
@@ -2617,6 +2617,263 @@ var EXAMS=[
 [
 "Accept the claim, since revenue growth always reflects stronger trading.",
 "Revenue timing can create growth without trading."
+]
+]
+]
+}
+]
+},
+{
+"t": "Midterm 7 (hard)",
+"cases": [
+{
+"n": "Velora Software",
+"p": "Velora sells two-year software licences with support. On 1 July 2026 it signed a €4.8m contract: the customer paid the full €4.8m upfront for 24 months of access and support, delivered evenly. Velora recognised €2.4m of revenue in 2026 (“the first year’s share”). It also paid €0.6m of sales commission on the deal and recorded it as an asset amortised over the 24 months of the contract. Year-end is 31 December. Velora reports 2026 operating profit of €3.1m and operating cash flow of €6.0m.",
+"qs": [
+[
+"How much revenue from the contract belongs to 2026, and what is the contract liability at 31 December?",
+[
+"€1.2m of revenue (6 of 24 months) and a contract liability of €3.6m.",
+"€4.8m ÷ 24 = €0.2m a month × 6 months (July–December) = €1.2m; the 18 months still owed = €3.6m."
+],
+[
+"€1.2m of revenue, because only six of the twenty-four months of service were delivered in 2026.",
+"Correct amount, but it leaves out the liability, which the question also asks for."
+],
+[
+"A contract liability of €3.6m, because eighteen months of access and support are still owed to the customer.",
+"Correct liability, but it leaves out the revenue figure."
+],
+[
+"€2.4m of revenue, because one full year of the two-year contract falls in 2026, so half the price is earned.",
+"The contract started on 1 July: only six months fall in 2026, not twelve."
+]
+],
+[
+"Is capitalising the €0.6m commission defensible, and what does it do to 2026 profit?",
+[
+"Defensible under matching, as it earns revenue over 24 months; only €0.15m is expensed in 2026, so profit is €0.45m higher.",
+"Judgment, principle and the amount: €0.6m ÷ 24 × 6 = €0.15m expensed, €0.45m deferred."
+],
+[
+"It is consistent with matching, because the commission is directly linked to revenue that is earned over the whole contract.",
+"Right reasoning, but it does not answer the second half of the question (the effect on profit)."
+],
+[
+"It makes 2026 profit higher than expensing the commission immediately would, because most of the cost is deferred to 2027–2028.",
+"True, but it neither judges the treatment nor quantifies it."
+],
+[
+"It must be expensed immediately, because all selling costs belong to the period in which they are paid in cash.",
+"Expenses follow the revenue they help generate, not the payment date."
+]
+],
+[
+"Operating cash flow (€6.0m) is far above operating profit (€3.1m). How should this be read?",
+[
+"Upfront cash for multi-year contracts inflates cash now; it doesn’t prove strong earnings, and later years get revenue with little cash.",
+"Timing explains the gap, and it reverses in future years."
+],
+[
+"Part of the gap is the €4.8m received upfront, most of which is not yet revenue and sits on the balance sheet as a contract liability.",
+"True and central, but it does not say what it means for the future."
+],
+[
+"Cash above profit is usually read as a sign of good earnings quality, because it shows that the reported profit is backed by real cash coming in.",
+"Usually true, but here the cash comes from service still owed, so it says little about quality."
+],
+[
+"The gap proves that Velora’s profit is understated by €2.9m and should be increased.",
+"Cash and profit differ because of timing; that does not make profit understated."
+]
+]
+]
+},
+{
+"n": "Nordhaven Shipping",
+"p": "Nordhaven owns 12 cargo ships carried at €900m. Freight rates have been 40% below average for two years. The ships’ recoverable amount is €620m at current rates, or €950m if rates return to their ten-year average, which management assumes will happen. A €400m loan has a covenant requiring equity of at least €500m; equity is €560m. This year management also extended the ships’ useful lives from 20 to 25 years.",
+"qs": [
+[
+"What is the most important judgment in Nordhaven’s accounts?",
+[
+"The impairment assumption: assuming a recovery avoids a €280m write-down that would take equity to €280m, well below the €500m covenant.",
+"It identifies the judgment, the amount (€900m − €620m) and why it matters so much."
+],
+[
+"The useful-life extension from 20 to 25 years, which lowers annual depreciation, supports reported profit and is hard for outsiders to check.",
+"A real judgment, but much smaller than the impairment decision."
+],
+[
+"Whether freight rates will recover to their ten-year average, which is highly uncertain after two weak years.",
+"That is the uncertainty behind the judgment, not the accounting judgment itself."
+],
+[
+"Whether the ships should be revalued up to €950m, the value they would have if freight rates returned to their ten-year average.",
+"Writing assets up to a hoped-for value breaks the cost principle."
+]
+],
+[
+"If the impairment were recognised, what would follow?",
+[
+"Equity drops to about €280m, breaching the covenant, so the loan may be called: a going-concern question.",
+"It follows the write-down through equity to the covenant and to survival."
+],
+[
+"A €280m impairment loss would reduce 2026 profit and the carrying amount of the ships on the balance sheet.",
+"True, but it stops before the covenant consequence."
+],
+[
+"Future depreciation would fall, because the ships would be depreciated from a lower carrying amount.",
+"True and subtle, but secondary."
+],
+[
+"Operating cash flow would fall by €280m in 2026, because the ships would be worth €280m less than before.",
+"An impairment is not a cash flow."
+]
+],
+[
+"Why is the useful-life extension, combined with the impairment decision, a concern?",
+[
+"Both choices lift profit and assets just as rates fall, suggesting assumptions chosen to protect the covenant, not to reflect economics.",
+"It reads the two choices together, as the course asks: direction, timing, incentive."
+],
+[
+"Longer useful lives reduce depreciation each year without any change in the cash that the ships actually generate from freight.",
+"True, but it treats the extension in isolation."
+],
+[
+"Changes in accounting estimates must be properly justified and disclosed in the notes, so that users can judge whether they are reasonable.",
+"True, but it does not say why these particular choices are worrying."
+],
+[
+"They cancel each other out, because one choice raises the reported value of the ships while the other one lowers it.",
+"Both choices push profit and assets up; neither lowers them."
+]
+]
+]
+},
+{
+"n": "Castelo Foods",
+"p": "Castelo Foods closes its books on 31 December. The auditor finds four items: (1) €900k of goods received from suppliers in December, invoices arriving in January, nothing recorded; the goods are still in the warehouse. (2) A €2m sale recorded on 28 December for goods delivered to the customer on 3 January; their €1.2m cost was removed from inventory in December. (3) €360k paid on 1 October for twelve months of advertising, all expensed. (4) A €150k electricity bill for December, received in January, nothing recorded.",
+"qs": [
+[
+"What is the net effect on 2026 profit of correcting all four items?",
+[
+"Profit falls by €680k: −€800k for the January sale, +€270k for prepaid advertising, −€150k for electricity; the goods in (1) don’t affect profit.",
+"(2) reverses €2m revenue and €1.2m cost (−€800k); (3) only 3 of 12 months belong to 2026 (+€270k); (4) −€150k."
+],
+[
+"Profit falls by €800k, because the €2m sale and its €1.2m cost both belong to January, not December.",
+"Right for item (2), but it ignores items (3) and (4)."
+],
+[
+"Item (1) does not change profit, because the goods are still in inventory; it only adds an asset and a liability.",
+"True, but it covers one item only."
+],
+[
+"Profit falls by €1,580k, because the €900k of goods received but not recorded must also be expensed.",
+"Goods still in the warehouse are inventory, not an expense."
+]
+],
+[
+"What is the combined effect of the corrections on the balance sheet?",
+[
+"Assets +€370k, liabilities +€1,050k, equity −€680k.",
+"Assets: +€900k inventory, +€1.2m inventory −€2m receivable, +€270k prepaid = +€370k. Liabilities: €900k + €150k. Check: 370 = 1,050 − 680."
+],
+[
+"Liabilities rise by €1,050k: €900k payable for the goods and €150k for the electricity.",
+"Correct, but only one side of the balance sheet."
+],
+[
+"Inventory rises by €2.1m: €900k of goods received plus €1.2m of products not yet delivered.",
+"Correct, but it ignores the receivable and the prepaid advertising."
+],
+[
+"Assets are unchanged, because the corrections only move amounts between the income statement and the balance sheet.",
+"Several assets change: inventory, receivables and prepaid advertising."
+]
+],
+[
+"Which principle mainly explains correction (2)?",
+[
+"Revenue recognition: control passes on delivery (3 January), so the revenue and, by matching, its cost belong to 2027.",
+"Names the deciding principle and links the cost to it."
+],
+[
+"Matching: the €1.2m cost of the products must be recognised in the same period as the revenue it helped to generate.",
+"True, but it explains the cost, not why the revenue moves."
+],
+[
+"Accounting period: the cut-off at 31 December is what decides which financial year receives the €2m sale and its cost.",
+"True, but the rule that places it is revenue recognition."
+],
+[
+"Cost principle: the products must stay at cost until the customer pays for them.",
+"Payment is irrelevant; delivery decides."
+]
+]
+]
+},
+{
+"n": "Atlas Retail Group",
+"p": "Atlas Retail reports “adjusted operating profit” of €80m against IFRS operating profit of €35m. The €45m of adjustments: €20m of “store-closure costs” (Atlas has closed stores in each of the last five years), €15m for an “IT transformation” now in the third year of a three-year programme, and €10m of share-based pay, paid every year. Separately, Atlas sold its headquarters to a company owned by the CEO’s family for €60m (book value €25m), booked the €35m gain inside IFRS operating profit, and now rents the building back.",
+"qs": [
+[
+"Which figure best represents Atlas’s recurring operating performance?",
+[
+"About €0m: IFRS operating profit of €35m minus the one-off €35m gain; the “adjustments” are costs that recur.",
+"Remove what is truly one-off (the gain) and keep what recurs (closures, IT, share pay)."
+],
+[
+"Below €35m, because the €35m gain on selling the headquarters is a one-off that will not repeat in future years.",
+"Right direction, but it doesn’t reach the figure."
+],
+[
+"Well below €80m, because store closures and share-based pay recur every year and are not one-off.",
+"Right about the adjustments, but it misses the gain."
+],
+[
+"€80m, because management’s adjusted figure removes the effects of one-off events and shows the underlying business.",
+"It removes recurring costs and keeps the real one-off gain: the opposite of what it claims."
+]
+],
+[
+"What does the headquarters sale raise?",
+[
+"A related-party sale far above book value, booked in operating profit: is €60m fair, and is the rent paid back to the family fair?",
+"It covers the counterparty, the price, the classification and the rent-back."
+],
+[
+"The €35m gain is a one-off and should not be treated as part of Atlas’s operating performance in any year.",
+"True, but it ignores the related-party problem."
+],
+[
+"Atlas now pays rent on a building it used to own, which raises its operating expenses in every future year.",
+"True, but secondary."
+],
+[
+"Nothing worrying: selling an asset above its book value always creates value for shareholders, whoever the buyer is.",
+"Not when the buyer is related to management and the price may not be fair."
+]
+],
+[
+"Which red flag fits Atlas best?",
+[
+"Recurring “one-offs”: costs excluded every year while a truly one-off gain is included, both flattering performance.",
+"The course’s red flag, in both directions."
+],
+[
+"The €35m gain is in operating profit, but the €60m cash is an investing inflow, so operating cash flow gets nothing.",
+"True and sharp, but it is a symptom of the bigger flag."
+],
+[
+"Governance concerns, because the deal involves the CEO’s family and its incentives.",
+"True, but about governance rather than earnings quality."
+],
+[
+"Heavy reliance on short-term debt to fund store closures.",
+"Nothing in the case concerns debt."
 ]
 ]
 ]
